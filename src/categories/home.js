@@ -48,27 +48,10 @@ export default function Home() {
           gap: "2rem",
         }}
       >
+        {/* Closet button */}
         <button
           style={{
-            flex: 1,
-            maxWidth: "250px",
-            height: "50px",
-            background: "#007AFF",
-            border: "none",
-            borderRadius: "12px",
-            color: "white",
-            fontSize: "1rem",
-            fontFamily: "SF Pro, sans-serif",
-            cursor: "pointer",
-          }}
-        >
-          Throw a Fit
-        </button>
-
-        <button
-          style={{
-            flex: 1,
-            maxWidth: "180px",
+            width: "180px",
             height: "50px",
             borderRadius: "1000px",
             background: "rgba(0,0,0,0.05)",
@@ -82,10 +65,27 @@ export default function Home() {
           Closet
         </button>
 
+        {/* Throw a Fit button (center) */}
         <button
           style={{
-            flex: 1,
-            maxWidth: "180px",
+            width: "250px",
+            height: "50px",
+            background: "#007AFF",
+            border: "none",
+            borderRadius: "12px",
+            color: "white",
+            fontSize: "1rem",
+            fontFamily: "SF Pro, sans-serif",
+            cursor: "pointer",
+          }}
+        >
+          Throw a Fit
+        </button>
+
+        {/* Upload button */}
+        <button
+          style={{
+            width: "180px",
             height: "50px",
             borderRadius: "1000px",
             background: "rgba(0,0,0,0.05)",
