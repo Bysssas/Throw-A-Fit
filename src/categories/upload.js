@@ -56,7 +56,7 @@ export default function Upload() {
         >
           <h1 style={{ fontFamily: "Arial" }}>Upload your Clothes!</h1>
           <input type="file" onChange={handleFileChange} />
-          <button onClick={handleUpload}>UplSoad</button>
+          <button onClick={handleUpload}>Upload</button>
         </div>
 
         {/* Decorative box */}
