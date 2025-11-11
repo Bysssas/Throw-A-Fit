@@ -142,9 +142,18 @@ export const FallingText = ({
     return () => {
       Render.stop(render);
       Runner.stop(runner);
-      if (render.canvas && canvasContainerRef.current) {
-        canvasContainerRef.current.removeChild(render.canvas);
-      }
+      const canvasContainer = canvasContainerRef.current;
+    ...
+    return () => {
+     Render.stop(render);
+     Runner.stop(runner);
+    if (render.canvas && canvasContainer) {
+      canvasContainer.removeChild(render.canvas);
+    }
+    World.clear(engine.world);
+    Engine.clear(engine);
+  };
+
       World.clear(engine.world);
       Engine.clear(engine);
     };
@@ -251,11 +260,12 @@ export const TextPressure = ({
     });
   };
 
-  useEffect(() => {
-    setSize();
-    window.addEventListener("resize", setSize);
-    return () => window.removeEventListener("resize", setSize);
-  }, [scale, text]);
+// eslint-disable-next-line react-hooks/exhaustive-deps
+useEffect(() => {
+  setSize();
+  window.addEventListener("resize", setSize);
+  return () => window.removeEventListener("resize", setSize);
+}, [scale, text]);
 
   useEffect(() => {
     let rafId;
