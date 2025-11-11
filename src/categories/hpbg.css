@@ -90,10 +90,13 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  height: 100%;
-  cursor: pointer;
+  height: 100vh; /* ✅ full viewport height */
+  display: flex;
+  justify-content: center;
+  align-items: flex-end; /* ✅ text sits at bottom */
+  padding-bottom: 5vh; /* ✅ slight offset from the bottom */
   text-align: center;
-  padding-top: 2em;
+  cursor: pointer;
 }
 
 .falling-text-target {

@@ -23,8 +23,8 @@ export default function Home() {
             trigger="auto"
             backgroundColor="transparent"
             wireframes={false}
-            gravity={1}
-            fontSize="5rem"
+            gravity={0.56}
+            fontSize="10rem"
             mouseConstraintStiffness={0.9}
           />
         )}
