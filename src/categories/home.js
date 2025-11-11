@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 import LightRays from "./hpbg";
 import "./hpbg.css";
-=======
 import { useNavigate } from "react-router-dom";
->>>>>>> 867e920e5cebf3bfef64afc1977bdefb688874e4
 
 export default function Home() {
   const navigate = useNavigate();
@@ -14,7 +11,7 @@ export default function Home() {
         width: "100vw",
         height: "100vh",
         position: "relative",
-        background: "white",
+        background: "black",
         overflow: "hidden",
       }}
     >
@@ -28,7 +25,7 @@ export default function Home() {
       >
         <LightRays
           raysOrigin="top-center"
-          raysColor="#00ffff"
+          raysColor="#ffffffff"
           raysSpeed={1.5}
           lightSpread={0.8}
           rayLength={1.2}
@@ -55,7 +52,7 @@ export default function Home() {
       >
         <div
           style={{
-            color: "black",
+            color: "white",
             fontSize: "5rem",
             fontFamily: "Inter",
             fontStyle: "Bold",

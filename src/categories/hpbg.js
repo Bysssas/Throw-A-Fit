@@ -1,7 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { Renderer, Program, Triangle, Mesh } from 'ogl';
-import './LightRays.css';
-import './homepage.css'; // 👈 Add this line to include homepage.css
+import './hpbg.css'; // 👈 Add this line to include homepage.css
 
 const DEFAULT_COLOR = '#ffffff';
 
