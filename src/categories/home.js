@@ -24,8 +24,8 @@ export default function Home() {
             backgroundColor="transparent"
             wireframes={false}
             gravity={0.56}
-            fontSize="5rem"
-            mouseConstraintStiffness={0.1}
+            fontSize="5 rem"
+            mouseConstraintStiffness={0.9}
           />
         )}
       </div>
