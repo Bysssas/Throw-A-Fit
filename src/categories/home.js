@@ -20,7 +20,7 @@ export default function Home() {
         ) : (
           <FallingText
             text={`Throw A Fit`}
-            trigger="click"
+            trigger="auto"
             backgroundColor="transparent"
             wireframes={false}
             gravity={1}
