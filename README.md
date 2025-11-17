@@ -6,7 +6,9 @@ This is the main repository for our group's app Throw A Fit.
 
 ## MILESTONE 1: (11-03)
 -we finished making the API we need for categorizing our clothes. **Repository link for the API: https://github.com/Bysssas/ThrowAFitAPI.git**
+
 -we used Render for the API's server.
+
 -we also finished basic setup of our database in MongoDB.
 
 ## MILESTONE 2: (11-05)
