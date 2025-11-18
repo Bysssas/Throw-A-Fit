@@ -1,33 +1,49 @@
-This is the main repository for our group's app Throw A Fit.
-## TEAM MEMBERS
--Nicole Salagantin
--Emma Lene Ejera
--Louis Ondrej L. Llamas
+## Throw A Fit: Project Development Report 
 
-## MILESTONE 1: (11-03)
--we finished making the API we need for categorizing our clothes. **Repository link for the API: https://github.com/Bysssas/ThrowAFitAPI.git**
+## 1. Introduction
+This development report will walk you through the development process for Throw A Fit, a web-based tool that helps users manage, categorize, and organize their clothes. 
 
--we used Render for the API's server.
+## 2. Team Members 
+Nicole Salagantin
 
--we also finished basic setup of our database in MongoDB.
+Emma Lene Ejera
 
-## MILESTONE 2: (11-05)
--we tested a few barebone frontend scenes because it was our first time using react.
--we managed to make it work!
+Louis Ondrej Llamas
 
-## MILESTONE 3: (11-08)
--we will start with integrating 2 more APIs namely cloudinary for getting a permanent image URL and being able to save that in our MongoDB database as well as ---remove.bg for removing backgrounds in uploaded pictures within the app.
+## Milestone 1 — November 3 
+During this stage, the team focused on establishing the backend foundation of the application: 
+- Developed the API responsible for categorizing clothing items. **Repository:**  https://github.com/Bysssas/ThrowAFitAPI.git
 
-## MILESTONE 4: (11-10)
-[ ] start with more concrete scenes for each page of our web app.
--the 9th is a break day, we have AGAPE sessions.
+- Deployed the API using Render as the hosting service. 
+Completed the initial setup and configuration of the project’s MongoDB database. 
 
-## MILESTONE 5: (11-11 - onwards)
-[ ] finish frontend
-[ ] connect EVERY SCENE PAGE
-[ ] app testing
-[ ] final tweaks
-[ ] FINISH
+## Milestone 2 — November 5 
+This milestone emphasized frontend experimentation and initial integration: 
+- Conducted tests on several basic frontend scenes to familiarize the team with React, as it was a new framework for all members. 
 
-## Throw A Fit Project Milestones
-Members: Nicole Jean Salagantin (Bysssas)
+- Successfully verified that the frontend structure and development environment functioned properly. 
+
+## Milestone 3 — November 8 
+At this stage, the team began planning for the integration of external APIs that will enhance the app’s image-handling capabilities: 
+- Prepared for the integration of Cloudinary to generate permanent image URLs for storage in MongoDB. 
+
+- Planned the use of remove.bg to automatically remove backgrounds from uploaded clothing images before they are processed or saved. 
+
+## Milestone 4 — November 10 
+This phase focused on frontend design planning: 
+- Began outlining more detailed interface designs and page structures for each major component of the application. 
+
+
+## Milestone 5 — November 11 Onwards 
+The final milestone encompasses the remaining development tasks required to complete the application: 
+- Finalize frontend development.
+  
+- Integrate and connect all scene pages to ensure smooth navigation. 
+- Conduct full application testing.
+  
+- Implement final adjustments and refinements based on test results.
+  
+- Prepare the application for final submission and deployment.
+
+## Conclusion
+With significant backend and early frontend components already in place, the Throw A Fit project has made steady progress toward its predetermined milestones. In order to produce a web application that is both functional and aesthetically pleasing, the following phases will prioritize completing thorough testing, guaranteeing API integration, and finalizing the user interface design.
