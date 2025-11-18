@@ -29,31 +29,39 @@ export default function Upload() {
     }
   };
 
-const handleUpload = async () => {
-  if (!file) {
-    alert("Please select or drag a file first!");
-    return;
-  }
+  const handleUpload = async () => {
+    if (!file) {
+      alert("Please select or drag a file first!");
+      return;
+    }
 
-  const formData = new FormData();
-  formData.append("image", file);
-  formData.append("category", "tops"); // or user-selected category later
+    const formData = new FormData();
+    formData.append("image", file); // Key must be "image" to match backend
+    formData.append("category", "tops"); 
 
-  try {
-    const res = await fetch("https://throwafit.onrender.com/api/upload", {
-      method: "POST",
-      body: formData
-    });
+    try {
+      const res = await fetch("https://throwafit.onrender.com/api/upload", {
+        method: "POST",
+        // Do NOT set Content-Type header when using FormData, 
+        // the browser sets it automatically with the correct boundary.
+        body: formData
+      });
 
-    const data = await res.json();
-    console.log("CLEAN IMAGE URL:", data.imageUrl);
-    alert("Upload complete!");
+      // Check for non-200 status codes
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(`Upload failed with status ${res.status}: ${errorData.message || 'Server error'}`);
+      }
 
-  } catch (error) {
-    console.error(error);
-    alert("Upload failed.");
-  }
-};
+      const data = await res.json();
+      console.log("CLEAN IMAGE URL:", data.imageUrl); // Expecting 'imageUrl'
+      alert("Upload complete! Image URL: " + data.imageUrl);
+
+    } catch (error) {
+      console.error("Upload Error:", error);
+      alert("Upload failed. Check console for details.");
+    }
+  };
 
   return (
     <div
@@ -140,7 +148,7 @@ const handleUpload = async () => {
 
         {file && (
           <div style={{ textAlign: "center" }}>
-            <p style={{ fontWeight: "bold" }}>{file.name}</p>
+            <p style={{ fontWeight: "bold" }}>Selected: {file.name}</p>
             {file.type.startsWith("image/") && (
               <img
                 src={URL.createObjectURL(file)}
