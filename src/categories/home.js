@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./hpbg.css";
 import { TextPressure, FallingText } from "./hpbg";
+import Squares from './hpbg';
+  
 
 export default function Home() {
   const navigate = useNavigate();
@@ -9,6 +11,13 @@ export default function Home() {
 
   return (
     <div className="home-container">
+      <Squares 
+        speed={0.5} 
+        squareSize={40}
+        direction='diagonal'
+        borderColor='#fff'
+        hoverFillColor='#222'
+      />
 
       {/* HEADER */}
       <div className="home-header" onClick={() => setFallen(true)}>
