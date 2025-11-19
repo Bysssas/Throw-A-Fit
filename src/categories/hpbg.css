@@ -11,7 +11,6 @@
     #3f9cff,
     #7fbfff,
     #bfe0ff,   /* light → moving toward center */
-    #e6f3ff,   /* LIGHTEST CENTER */
     #bfe0ff,
     #7fbfff,
     #3f9cff,
@@ -69,27 +68,43 @@
 }
 
 .home-btn.secondary {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.8);
+  background: rgba(0, 0, 0, 0.15); /* subtle dark overlay */
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: white;
+  backdrop-filter: blur(8px); /* elegant frosted glass effect */
 }
 
 .home-btn.secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.25);
 }
 
 .home-btn.primary {
   width: 250px;
   height: 50px;
   border-radius: 12px;
-  background: #007aff;
-  color: white;
   border: none;
-  font-weight: 500;
+  font-weight: 600;
+  color: #ffffff;
+  
+  background: linear-gradient(
+    135deg,
+    #0050ff,
+    #2f6bff,
+    #6fa2ff
+  );
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
 }
 
 .home-btn.primary:hover {
-  background: #1a84ff;
+  background: linear-gradient(
+    135deg,
+    #1a66ff,
+    #4a82ff,
+    #8db8ff
+  );
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
 .falling-text-container {
