@@ -17,7 +17,6 @@
     #007bff    /* darkest (right) */
   );
 
-  color: white;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -41,7 +40,7 @@
   font-style: italic;
   font-weight: 600;
   text-align: center;
-  color: #ffffff;
+  color: #e44a8dff;
 }
 
 /* Footer / Buttons */
@@ -64,14 +63,13 @@
   font-size: 0.9rem;
   font-family: "SF Pro", sans-serif;
   cursor: pointer;
-  color: #e44a8dff;
   transition: all 0.3s ease;
 }
 
 .home-btn.secondary {
   background: rgba(0, 0, 0, 0.15); /* subtle dark overlay */
   border: 1px solid rgba(255, 255, 255, 0.5);
-  color: white;
+  color: #e44a8dff;
   backdrop-filter: blur(8px); /* elegant frosted glass effect */
 }
 
@@ -85,7 +83,7 @@
   border-radius: 12px;
   border: none;
   font-weight: 600;
-  color: #ffffff;
+  color: #e44a8dff;
   
   background: linear-gradient(
     135deg,
