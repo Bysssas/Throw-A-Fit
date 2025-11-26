@@ -5,7 +5,7 @@ import { motion, useInView } from 'framer-motion';
 import './closet.css';
 
 // ✅ Your actual backend URL
-const BASE_API_URL = 'https://throw-a-fit.onrender.com/api';
+const BASE_API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 // ✅ Correct endpoint map based on your backend routes
 const ENDPOINT_MAP = {
