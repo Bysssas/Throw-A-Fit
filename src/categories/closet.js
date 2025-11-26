@@ -1,32 +1,36 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// IMPORTANT: You need to install react-icons (npm install react-icons)
 import { FaUserCircle } from 'react-icons/fa'; 
 import './closet.css'; 
 
+// Import the new components
+import AnimatedList from './AnimatedList'; 
+// Assuming AnimatedItem is defined within AnimatedList, so we don't import it directly
+
 // --- DUMMY DATA ---
-// In a real application, this data would be fetched from your backend API
 const categoriesData = [
-  { name: 'Tops', endpoint: '/closet/tops', items: ['Tee', 'Blouse', 'Sweater', 'Tank'] },
-  { name: 'Bottoms', endpoint: '/closet/bottoms', items: ['Jeans', 'Skirt', 'Shorts', 'Trousers'] },
-  { name: 'Accessories', endpoint: '/closet/accessories', items: ['Scarf', 'Hat', 'Belt', 'Necklace'] },
-  { name: 'Shoes', endpoint: '/closet/shoes', items: ['Sneakers', 'Boots', 'Sandals', 'Heels'] },
+  { name: 'Tops', endpoint: '/closet/tops', items: ['T-Shirt', 'Blouse', 'Sweater', 'Tank Top', 'Hoodie', 'Polo Shirt', 'Tunic'] },
+  { name: 'Bottoms', endpoint: '/closet/bottoms', items: ['Jeans', 'Skirt', 'Shorts', 'Trousers', 'Leggings', 'Capris'] },
+  { name: 'Accessories', endpoint: '/closet/accessories', items: ['Scarf', 'Hat', 'Belt', 'Necklace', 'Earrings', 'Watch'] },
+  { name: 'Shoes', endpoint: '/closet/shoes', items: ['Sneakers', 'Boots', 'Sandals', 'Heels', 'Flats', 'Loafers'] },
 ];
 // ------------------
 
-
 export default function Closet() {
   const navigate = useNavigate();
-  // State to track what should be displayed in the large preview box
   const [mainPreviewItem, setMainPreviewItem] = useState(null); 
 
+  // Function to handle item selection from any AnimatedList
+  const handleItemSelect = (item) => {
+    setMainPreviewItem(item);
+  };
+
   return (
-    <div className="closet-popup">
+    <div className="closet-page-wrapper"> {/* Changed class to wrapper the full page */}
       
       {/* HEADER: Title, Account Icon, and Close Button */}
       <div className="closet-header">
         <div className="closet-title-area">
-          {/* The account icon from your image */}
           <FaUserCircle 
             className="account-icon" 
             size={24} 
@@ -35,7 +39,6 @@ export default function Closet() {
           />
           <h2>Closet</h2>
         </div>
-        {/* Close button (x) to dismiss the view, navigating back to home */}
         <button className="close-btn" onClick={() => navigate('/')}>&times;</button>
       </div>
 
@@ -48,36 +51,34 @@ export default function Closet() {
         )}
       </div>
 
-      {/* 2. CATEGORY PREVIEWS (The smaller gray rectangles) */}
+      {/* 2. CATEGORY PREVIEWS - Using the AnimatedList for each row */}
       <div className="category-list">
         {categoriesData.map((category) => (
-          <div key={category.name} className="category-preview-row">
+          <div key={category.name} className="category-row-wrapper">
             
-            {/* Category Name (e.g., "Tops") */}
-            <h3 className="category-name">{category.name}</h3>
-
-            {/* Item Previews (showing a few items) */}
-            <div className="item-preview-grid">
-              {category.items.slice(0, 3).map((item, index) => ( // Display max 3 items
-                <div 
-                  key={index} 
-                  className="item-preview-box"
-                  // On click, set this item as the main item to preview
-                  onClick={() => setMainPreviewItem(item)} 
-                >
-                  <p className="item-placeholder-text">{item}</p> 
-                  {/* In a real app, this would be <img src={item.imageUrl} alt={item.name} /> */}
-                </div>
-              ))}
+            <div className="category-header-and-button">
+              <h3 className="category-name">{category.name}</h3>
+              <button 
+                className="more-btn"
+                onClick={() => navigate(category.endpoint)}
+              >
+                More &raquo;
+              </button>
             </div>
 
-            {/* "More" Button to Navigate to the Full Category View */}
-            <button 
-              className="more-btn"
-              onClick={() => navigate(category.endpoint)} // Navigates to e.g., /closet/tops
-            >
-              More &raquo;
-            </button>
+            {/* The Animated List is used here to display the items horizontally and scrollable */}
+            <div className="animated-list-container">
+                <AnimatedList
+                    items={category.items}
+                    onItemSelect={handleItemSelect}
+                    showGradients={false} // Turn off list gradients to use page gradients
+                    enableArrowNavigation={false} // Disable keyboard nav for embedded lists
+                    displayScrollbar={true} 
+                    className="horizontal-list-wrapper"
+                    itemClassName="item-preview-box-animated"
+                />
+            </div>
+            
           </div>
         ))}
       </div>
