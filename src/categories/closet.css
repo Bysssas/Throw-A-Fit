@@ -95,37 +95,37 @@
 
 /* Container for the Horizontal Animated List */
 .animated-list-container {
-    /* Enables horizontal scrolling for the inner AnimatedList */
     overflow-x: auto; 
     overflow-y: hidden;
-    padding-bottom: 15px; /* Adds space for potential horizontal scrollbar */
+    padding-bottom: 15px;
 }
 
-/* Horizontal List Wrapper overrides the default vertical scroll of AnimatedList */
+/* Horizontal List Wrapper */
 .horizontal-list-wrapper .scroll-list {
     display: flex;
     gap: 15px;
-    /* This ensures the content can extend horizontally */
-    max-height: none; 
-    overflow-y: hidden; 
+    max-height: none;
+    overflow-y: hidden;
     overflow-x: scroll;
     padding: 0;
 }
 
 .horizontal-list-wrapper .scroll-list::-webkit-scrollbar {
-    height: 8px; /* For horizontal scrollbar */
+    height: 8px;
 }
 
-/* Item Styling within the horizontal list */
+/* Item Styling */
 .item-preview-box-animated {
-    width: 200px; /* Fixed width for horizontal items */
-    min-width: 200px; /* Ensures they don't shrink */
-    height: 150px; /* Height for the preview box */
+    width: 200px;
+    min-width: 200px;
+    height: 150px;
     background-color: #271e37; 
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 8px;
+    padding: 5px;
+    overflow: hidden;
 }
 
 .item-preview-box-animated .item-text {
@@ -209,26 +209,20 @@
 .main-preview-image {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Ensures the whole image is visible without cropping */
+    object-fit: contain;
     border-radius: 8px;
-    padding: 10px; /* Padding inside the container */
+    padding: 10px;
 }
 
-/* Style for the small images in the item preview boxes */
+/* Style for the small preview images */
 .item-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Crops the image to fill the small preview box */
+    object-fit: cover;
     border-radius: 6px;
 }
 
-/* Ensure the item box is ready to hold the image */
-.item-preview-box-animated {
-    padding: 5px; /* Add small padding around the image */
-    overflow: hidden; /* Important for object-fit: cover */
-}
-
-/* Styling for no items found message */
+/* No items message */
 .no-items-text {
     color: #999;
     font-style: italic;
@@ -311,3 +305,27 @@
     font-size: 0.9rem;
 }
 
+/* ────────────────────────────── */
+/* ⭐ NEW: STACKABLE DRAGGABLE PREVIEW STYLES */
+/* ────────────────────────────── */
+
+.upgraded-preview {
+    position: relative;
+    height: 500px;
+    width: 100%;
+    background-color: #170d27;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.preview-layer-item {
+    position: absolute;
+    width: 200px;
+    height: auto;
+    cursor: grab;
+    user-select: none;
+}
+
+.preview-layer-item:active {
+    cursor: grabbing;
+}

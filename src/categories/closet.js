@@ -20,6 +20,38 @@ const initialDataStructure = {
     Shoes: [],
 };
 
+// ─────────────────────────────────────────
+// DRAGGABLE PREVIEW ITEM COMPONENT
+// ─────────────────────────────────────────
+const DraggablePreviewItem = ({ item, index, onDragStart, onRemove }) => {
+    const ref = useRef(null);
+
+    const handleMouseDown = (e) => {
+        if (!ref.current) return;
+        const rect = ref.current.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+        onDragStart(index, offsetX, offsetY);
+    };
+
+    const handleDoubleClick = () => {
+        onRemove(index);
+    };
+
+    return (
+        <img
+            ref={ref}
+            src={item.imageUrl}
+            alt={item.name}
+            className="preview-layer-item"
+            style={{ top: `${item.y}px`, left: `${item.x}px`, zIndex: index + 10 }}
+            onMouseDown={handleMouseDown}
+            onDoubleClick={handleDoubleClick}
+            draggable={false}
+        />
+    );
+};
+
 // ──────────────────────────────
 // ANIMATED LIST COMPONENTS
 // ──────────────────────────────
@@ -47,7 +79,7 @@ const AnimatedList = ({ items = [], onItemSelect }) => {
             <div className="scroll-list" style={{ display: 'flex', gap: '15px' }}>
                 {items.map((item, index) => (
                     <AnimatedItem
-                        key={item._id}
+                        key={item._id || `${item.name}-${index}`}
                         index={index}
                         delay={0.05 * index}
                         onClick={() => onItemSelect(item)}
@@ -86,7 +118,7 @@ const CategoryModal = ({ category, items, onClose, onSelect }) => {
                 <div className="modal-grid">
                     {items.map(item => (
                         <div
-                            key={item._id}
+                            key={item._id || item.name}
                             className="modal-item"
                             onClick={() => {
                                 onSelect(item);
@@ -122,6 +154,13 @@ export default function Closet() {
     const [modalCategory, setModalCategory] = useState("");
     const [modalItems, setModalItems] = useState([]);
 
+    // Draggable preview stack state
+    const [previewItems, setPreviewItems] = useState([]);
+    const previewRef = useRef(null);
+
+    // Dragging refs
+    const draggingRef = useRef({ index: -1, offsetX: 0, offsetY: 0 });
+
     useEffect(() => {
         const fetchClothes = async () => {
             setLoading(true);
@@ -135,7 +174,7 @@ export default function Closet() {
                         return items.map(item => ({
                             ...item,
                             category: correctCategory,                  // Forces display category
-                            originalCategory: item.category?.trim() || ""  // Normalize backend category
+                            originalCategory: (item.category || "").toString().trim().toLowerCase()  // Normalize backend category
                         }));
                     })
                 );
@@ -148,7 +187,7 @@ export default function Closet() {
                 setClothesData(grouped);
             } catch (err) {
                 console.error(err);
-                setError(err.message);
+                setError(err.message || 'Failed to load items');
             } finally {
                 setLoading(false);
             }
@@ -157,14 +196,66 @@ export default function Closet() {
         fetchClothes();
     }, []);
 
+    // Open modal - show items that likely belong to that category
     const openModal = (category) => {
         setModalCategory(category);
         setModalItems(
             (clothesData[category] || []).filter(
-                item => item.originalCategory.toLowerCase() === category.toLowerCase()
+                item => item.originalCategory.toString().toLowerCase() === category.toLowerCase()
             )
         );
         setModalOpen(true);
+    };
+
+    // Add item to the preview stack (centered by default)
+    const addItemToPreview = (item) => {
+        // set main preview too for immediate single-image fallback
+        setMainPreviewItem(item);
+
+        const rect = previewRef.current?.getBoundingClientRect();
+        const defaultWidth = 200;
+        const defaultHeight = 200;
+        const centerX = rect ? Math.max((rect.width - defaultWidth) / 2, 0) : 50;
+        const centerY = rect ? Math.max((rect.height - defaultHeight) / 2, 0) : 50;
+
+        setPreviewItems(prev => ([
+            ...prev,
+            {
+                ...item,
+                x: centerX,
+                y: centerY
+            }
+        ]));
+    };
+
+    // Remove item from preview stack
+    const removePreviewItem = (index) => {
+        setPreviewItems(prev => prev.filter((_, i) => i !== index));
+    };
+
+    // Start dragging - triggered by DraggablePreviewItem
+    const handleDragStart = (index, offsetX, offsetY) => {
+        draggingRef.current = { index, offsetX, offsetY };
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+    };
+
+    const handleMouseMove = (e) => {
+        const { index, offsetX, offsetY } = draggingRef.current;
+        if (index < 0) return;
+        const rect = previewRef.current?.getBoundingClientRect();
+        if (!rect) return;
+
+        const newX = e.clientX - rect.left - offsetX;
+        const newY = e.clientY - rect.top - offsetY;
+
+        setPreviewItems(prev => prev.map((it, i) => i === index ? { ...it, x: Math.max(newX, 0), y: Math.max(newY, 0) } : it));
+    };
+
+    const handleMouseUp = () => {
+        draggingRef.current = { index: -1, offsetX: 0, offsetY: 0 };
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
     };
 
     if (loading) return <div className="closet-page-wrapper loading-state">Loading wardrobe…</div>;
@@ -181,21 +272,33 @@ export default function Closet() {
                 <button className="close-btn" onClick={() => navigate('/')}>×</button>
             </div>
 
-            {/* MAIN PREVIEW */}
-            <div className="main-preview-container">
-                {mainPreviewItem?.imageUrl ? (
-                    <img src={mainPreviewItem.imageUrl} alt={mainPreviewItem.name} className="main-preview-image" />
+            {/* MAIN PREVIEW - upgraded with draggable stack */}
+            <div className="upgraded-preview" ref={previewRef}>
+                {/* If there are previewItems, render them stacked/draggable */}
+                {previewItems.length > 0 ? (
+                    previewItems.map((item, i) => (
+                        <DraggablePreviewItem
+                            key={item._id || `${item.name}-${i}`}
+                            item={item}
+                            index={i}
+                            onDragStart={handleDragStart}
+                            onRemove={removePreviewItem}
+                        />
+                    ))
                 ) : (
-                    <p className="preview-text">
-                        {mainPreviewItem ? mainPreviewItem.name : "Click an item below to preview it."}
-                    </p>
+                    // Fallback single image preview when the stack is empty
+                    mainPreviewItem?.imageUrl ? (
+                        <img src={mainPreviewItem.imageUrl} alt={mainPreviewItem.name} className="main-preview-image" />
+                    ) : (
+                        <p className="preview-text">{mainPreviewItem ? mainPreviewItem.name : "Click an item below to preview it."}</p>
+                    )
                 )}
             </div>
 
             {/* CATEGORIES */}
             {Object.keys(clothesData).map(category => {
-                const filteredItems = clothesData[category].filter(
-                    item => item.originalCategory.toLowerCase() === category.toLowerCase()
+                const filteredItems = (clothesData[category] || []).filter(
+                    item => item.originalCategory.toString().toLowerCase() === category.toLowerCase()
                 );
 
                 return (
@@ -212,7 +315,7 @@ export default function Closet() {
                         <div className="animated-list-container">
                             <AnimatedList
                                 items={filteredItems}
-                                onItemSelect={setMainPreviewItem}
+                                onItemSelect={addItemToPreview}
                             />
                         </div>
                     </div>
@@ -225,7 +328,7 @@ export default function Closet() {
                     category={modalCategory}
                     items={modalItems}
                     onClose={() => setModalOpen(false)}
-                    onSelect={setMainPreviewItem}
+                    onSelect={addItemToPreview}
                 />
             )}
         </div>
