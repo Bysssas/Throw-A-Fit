@@ -42,7 +42,6 @@ const AnimatedItem = ({ children, delay = 0, index, onClick }) => {
 };
 
 const AnimatedList = ({ items = [], onItemSelect }) => {
-    // Items are already correctly grouped by category → no extra filtering needed
     return (
         <div className="scroll-list-container horizontal-list-wrapper">
             <div className="scroll-list" style={{ display: 'flex', gap: '15px' }}>
@@ -123,7 +122,7 @@ export default function Closet() {
     const [modalCategory, setModalCategory] = useState("");
     const [modalItems, setModalItems] = useState([]);
 
-      useEffect(() => {
+    useEffect(() => {
         const fetchClothes = async () => {
             setLoading(true);
             try {
@@ -133,12 +132,10 @@ export default function Closet() {
                         if (!res.ok) throw new Error(`Failed to load ${correctCategory}`);
                         const items = await res.json();
 
-                        // THIS IS THE BULLETPROOF FIX
-                        // Even if backend returns a halter top under /accessories → it will be forced into Tops only
                         return items.map(item => ({
                             ...item,
-                            category: correctCategory,           // ← Forces correct category
-                            originalCategory: item.category      // optional – keep old value for debugging
+                            category: correctCategory,                  // Forces display category
+                            originalCategory: item.category?.trim() || ""  // Normalize backend category
                         }));
                     })
                 );
@@ -162,7 +159,11 @@ export default function Closet() {
 
     const openModal = (category) => {
         setModalCategory(category);
-        setModalItems(clothesData[category] || []); // Already correct → no filter needed
+        setModalItems(
+            (clothesData[category] || []).filter(
+                item => item.originalCategory.toLowerCase() === category.toLowerCase()
+            )
+        );
         setModalOpen(true);
     };
 
@@ -192,29 +193,31 @@ export default function Closet() {
             </div>
 
             {/* CATEGORIES */}
-            {Object.keys(clothesData).map(category => (
-                <div key={category} className="category-row-wrapper">
-                    <div className="category-header-and-button">
-                        <h3 className="category-name">{category}</h3>
-                        {(clothesData[category]?.length > 0) && (
-                            <button className="more-btn" onClick={() => openModal(category)}>
-                                More »
-                            </button>
-                        )}
-                    </div>
+            {Object.keys(clothesData).map(category => {
+                const filteredItems = clothesData[category].filter(
+                    item => item.originalCategory.toLowerCase() === category.toLowerCase()
+                );
 
-                    <div className="animated-list-container">
-                        {clothesData[category].length > 0 ? (
+                return (
+                    <div key={category} className="category-row-wrapper">
+                        <div className="category-header-and-button">
+                            <h3 className="category-name">{category}</h3>
+                            {filteredItems.length > 0 && (
+                                <button className="more-btn" onClick={() => openModal(category)}>
+                                    More »
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="animated-list-container">
                             <AnimatedList
-                                items={clothesData[category]}
+                                items={filteredItems}
                                 onItemSelect={setMainPreviewItem}
                             />
-                        ) : (
-                            <p className="no-items-text">No {category.toLowerCase()} yet — time to upload!</p>
-                        )}
+                        </div>
                     </div>
-                </div>
-            ))}
+                );
+            })}
 
             {/* MODAL */}
             {modalOpen && (
