@@ -1,14 +1,13 @@
-/* Full Page Wrapper */
 .closet-page-wrapper {
-    background-color: #060010; /* Use your animation background color */
+    background-color: #060010; 
     color: white;
-    min-height: 100vh; /* Full viewport height */
-    padding: 20px 40px; /* Padding for the sides and top/bottom */
+    min-height: 100vh; 
+    padding: 20px 40px; 
     box-sizing: border-box;
     width: 100%;
 }
 
-/* Header styling remains similar */
+
 .closet-header {
     display: flex;
     justify-content: space-between;
@@ -41,8 +40,8 @@
 
 
 .main-preview-container {
-    background-color: #170d27; /* Dark background for preview */
-    height: 350px; /* A bit taller for impact */
+    background-color: #170d27; 
+    height: 350px; 
     width: 100%;
     margin-bottom: 40px;
     display: flex;
@@ -59,7 +58,7 @@
     padding: 10px;
 }
 
-/* 2. CATEGORY PREVIEW ROWS */
+
 .category-row-wrapper {
     margin-bottom: 30px;
 }
@@ -74,10 +73,10 @@
 .category-name {
     margin: 0;
     font-size: 1.4rem;
-    color: #e44a8dff; /* Accent color for category name */
+    color: #e44a8dff; 
 }
 
-/* "More" Button Styling */
+
 .more-btn {
     background-color: #8a2be2;
     border: none;
@@ -93,14 +92,14 @@
     background-color: #6a0dad;
 }
 
-/* Container for the Horizontal Animated List */
+
 .animated-list-container {
     overflow-x: auto; 
     overflow-y: hidden;
     padding-bottom: 15px;
 }
 
-/* Horizontal List Wrapper */
+
 .horizontal-list-wrapper .scroll-list {
     display: flex;
     gap: 15px;
@@ -114,7 +113,7 @@
     height: 8px;
 }
 
-/* Item Styling */
+
 .item-preview-box-animated {
     width: 200px;
     min-width: 200px;
@@ -205,7 +204,7 @@
   transition: opacity 0.3s ease;
 }
 
-/* Style for the large image in the main preview box */
+
 .main-preview-image {
     width: 100%;
     height: 100%;
@@ -214,7 +213,7 @@
     padding: 10px;
 }
 
-/* Style for the small preview images */
+
 .item-image {
     width: 100%;
     height: 100%;
@@ -222,14 +221,13 @@
     border-radius: 6px;
 }
 
-/* No items message */
 .no-items-text {
     color: #999;
     font-style: italic;
     padding: 10px 0;
 }
 
-/* ─────── MODAL STYLES ─────── */
+
 .modal-overlay {
     position: fixed;
     inset: 0;

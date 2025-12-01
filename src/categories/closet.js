@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FaUserCircle } from 'react-icons/fa';
@@ -7,193 +6,82 @@ import './closet.css';
 
 const BASE_API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
-const ENDPOINT_MAP = {
-    Tops: '/items/tops',
-    Bottoms: '/items/bottoms',
-    Accessories: '/items/accessories',
-    Shoes: '/items/shoes',
-};
-
-const initialDataStructure = {
-    Tops: [],
-    Bottoms: [],
-    Accessories: [],
-    Shoes: [],
-};
-
-// DRAGGABLE PREVIEW ITEM COMPONENT
-const DraggablePreviewItem = ({ item, index, onDragStart, onRemove }) => {
-    const ref = useRef(null);
-
-    const handleMouseDown = (e) => {
-        if (!ref.current) return;
-        const rect = ref.current.getBoundingClientRect();
-        const offsetX = e.clientX - rect.left;
-        const offsetY = e.clientY - rect.top;
-        onDragStart(index, offsetX, offsetY);
-    };
-
-    return (
-        <img
-            ref={ref}
-            src={item.imageUrl}
-            alt={item.name}
-            className="preview-layer-item"
-            style={{ top: `${item.y}px`, left: `${item.x}px`, zIndex: index + 10 }}
-            onMouseDown={handleMouseDown}
-            onDoubleClick={() => onRemove(index)}
-            draggable={false}
-        />
-    );
-};
-
-// ANIMATED ITEM & LIST
-const AnimatedItem = ({ children, delay = 0, onClick }) => {
-    const ref = useRef(null);
-    const inView = useInView(ref, { amount: 0.5 });
-
-    return (
-        <motion.div
-            ref={ref}
-            onClick={onClick}
-            initial={{ scale: 0.7, opacity: 0 }}
-            animate={inView ? { scale: 1, opacity: 1 } : { scale: 0.7, opacity: 0 }}
-            transition={{ duration: 0.2, delay }}
-            style={{ cursor: "pointer", flexShrink: 0 }}
-        >
-            {children}
-        </motion.div>
-    );
-};
-
-const AnimatedList = ({ items = [], onItemSelect }) => {
-    return (
-        <div className="scroll-list-container horizontal-list-wrapper">
-            <div className="scroll-list" style={{ display: 'flex', gap: '15px' }}>
-                {items.length === 0 ? (
-                    <p className="no-items-text" style={{ color: '#999', padding: '20px 0' }}>
-                        No items yet
-                    </p>
-                ) : (
-                    items.map((item, index) => (
-                        <AnimatedItem
-                            key={item._id || `${item.name}-${index}`}
-                            delay={0.05 * index}
-                            onClick={() => onItemSelect(item)}
-                        >
-                            <div className="item item-preview-box-animated">
-                                {item.imageUrl ? (
-                                    <img src={item.imageUrl} alt={item.name || "Item"} className="item-image" />
-                                ) : (
-                                    <p className="item-text">No image</p>
-                                )}
-                            </div>
-                        </AnimatedItem>
-                    ))
-                )}
-            </div>
-        </div>
-    );
-};
-
-// MAIN CLOSET PAGE
 export default function Closet() {
     const navigate = useNavigate();
     const location = useLocation();
-    const [mainPreviewItem, setMainPreviewItem] = useState(null);
-    const [clothesData, setClothesData] = useState(initialDataStructure);
+    const [clothesData, setClothesData] = useState({
+        Tops: [], Bottoms: [], Accessories: [], Shoes: []
+    });
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
     const [previewItems, setPreviewItems] = useState([]);
     const previewRef = useRef(null);
-    const draggingRef = useRef({ index: -1, offsetX: 0, offsetY: 0 });
 
     useEffect(() => {
         const fetchClothes = async () => {
             setLoading(true);
+            const categories = [
+                { name: 'Tops', endpoint: '/items/tops' },
+                { name: 'Bottoms', endpoint: '/items/bottoms' },
+                { name: 'Accessories', endpoint: '/items/accessories' },
+                { name: 'Shoes', endpoint: '/items/shoes' }
+            ];
+
             try {
                 const results = await Promise.all(
-                    Object.entries(ENDPOINT_MAP).map(async ([correctCategory, endpoint]) => {
+                    categories.map(async ({ name, endpoint }) => {
                         const res = await fetch(`${BASE_API_URL}${endpoint}`);
-                        if (!res.ok) throw new Error(`Failed to load ${correctCategory}`);
+                        if (!res.ok) return [];
                         const items = await res.json();
-                        return items.map(item => ({
-                            ...item,
-                            category: correctCategory,
-                            originalCategory: (item.category || "").toString().trim().toLowerCase()
-                        }));
+                        
+                        return items.filter(item => item.category?.toLowerCase() === name.toLowerCase());
                     })
                 );
 
-                const grouped = Object.keys(ENDPOINT_MAP).reduce((acc, category, i) => {
-                    acc[category] = results[i];
-                    return acc;
-                }, {});
-
-                setClothesData(grouped);
+                setClothesData({
+                    Tops: results[0],
+                    Bottoms: results[1],
+                    Accessories: results[2],
+                    Shoes: results[3]
+                });
             } catch (err) {
-                console.error(err);
-                setError(err.message || 'Failed to load items');
+                console.error("Fetch error:", err);
             } finally {
                 setLoading(false);
             }
         };
+
         fetchClothes();
     }, []);
 
-    // Auto-add item when returning from category page
+    
     useEffect(() => {
         if (location.state?.addToPreview) {
-            addItemToPreview(location.state.addToPreview);
+            const item = location.state.addToPreview;
+            const rect = previewRef.current?.getBoundingClientRect();
+            const centerX = rect ? (rect.width - 200) / 2 : 100;
+            const centerY = rect ? (rect.height - 300) / 2 : 100;
+            setPreviewItems(prev => [...prev, { ...item, x: centerX, y: centerY }]);
             navigate('/closet', { replace: true });
         }
-    }, [location.state]);
+    }, [location.state, navigate]);
 
     const openCategoryPage = (category) => {
-        navigate(`/closet/${category.toLowerCase()}`);
+        
+        const items = clothesData[category]?.filter(item => item.category?.toLowerCase() === category.toLowerCase()) || [];
+        navigate(`/closet/${category.toLowerCase()}`, { state: { items } });
     };
 
-    const addItemToPreview = (item) => {
-        setMainPreviewItem(item);
+    const addToPreview = (item) => {
         const rect = previewRef.current?.getBoundingClientRect();
-        const centerX = rect ? Math.max((rect.width - 200) / 2, 0) : 50;
-        const centerY = rect ? Math.max((rect.height - 200) / 2, 0) : 50;
-
+        const centerX = rect ? (rect.width - 200) / 2 : 100;
+        const centerY = rect ? (rect.height - 300) / 2 : 100;
         setPreviewItems(prev => [...prev, { ...item, x: centerX, y: centerY }]);
     };
 
-    const removePreviewItem = (index) => {
-        setPreviewItems(prev => prev.filter((_, i) => i !== index));
-    };
-
-    const handleDragStart = (index, offsetX, offsetY) => {
-        draggingRef.current = { index, offsetX, offsetY };
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', handleMouseUp);
-    };
-
-    const handleMouseMove = (e) => {
-        const { index, offsetX, offsetY } = draggingRef.current;
-        if (index < 0) return;
-        const rect = previewRef.current?.getBoundingClientRect();
-        if (!rect) return;
-        const newX = e.clientX - rect.left - offsetX;
-        const newY = e.clientY - rect.top - offsetY;
-        setPreviewItems(prev => prev.map((it, i) => i === index ? { ...it, x: Math.max(newX, 0), y: Math.max(newY, 0) } : it));
-    };
-
-    const handleMouseUp = () => {
-        draggingRef.current = { index: -1, offsetX: 0, offsetY: 0 };
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    if (loading) return <div className="closet-page-wrapper loading-state">Loading wardrobe…</div>;
-    if (error) return <div className="closet-page-wrapper error-state">Warning: {error}</div>;
+    if (loading) return <div className="closet-page-wrapper">Loading wardrobe…</div>;
 
     return (
         <div className="closet-page-wrapper">
-            {/* HEADER */}
             <div className="closet-header">
                 <div className="closet-title-area">
                     <FaUserCircle className="account-icon" size={24} onClick={() => navigate('/profile')} />
@@ -202,50 +90,56 @@ export default function Closet() {
                 <button className="close-btn" onClick={() => navigate('/')}>×</button>
             </div>
 
-            {/* MAIN PREVIEW AREA */}
             <div className="upgraded-preview" ref={previewRef}>
                 {previewItems.length > 0 ? (
                     previewItems.map((item, i) => (
-                        <DraggablePreviewItem
-                            key={item._id || i}
-                            item={item}
-                            index={i}
-                            onDragStart={handleDragStart}
-                            onRemove={removePreviewItem}
+                        <img
+                            key={i}
+                            src={item.imageUrl}
+                            alt={item.name}
+                            className="preview-layer-item"
+                            style={{ top: item.y, left: item.x, zIndex: i + 10 }}
+                            onDoubleClick={() => setPreviewItems(prev => prev.filter((_, idx) => idx !== i))}
                         />
                     ))
-                ) : mainPreviewItem?.imageUrl ? (
-                    <img src={mainPreviewItem.imageUrl} alt={mainPreviewItem.name} className="main-preview-image" />
                 ) : (
-                    <p className="preview-text">Click an item below to preview it.</p>
+                    <p className="preview-text">Click any item to add it here</p>
                 )}
             </div>
 
-            {/* CATEGORIES WITH ALWAYS-VISIBLE "More »" BUTTON */}
-            {Object.keys(clothesData).map(category => {
-                const filteredItems = (clothesData[category] || []).filter(
-                    item => item.originalCategory === category.toLowerCase()
-                );
+            {['Tops', 'Bottoms', 'Accessories', 'Shoes'].map(category => {
+                const items = clothesData[category]?.filter(item => item.category?.toLowerCase() === category.toLowerCase()) || [];
 
                 return (
                     <div key={category} className="category-row-wrapper">
                         <div className="category-header-and-button">
                             <h3 className="category-name">{category}</h3>
-                            
-                            {/* "More »" button is now ALWAYS visible */}
-                            <button
-                                className="more-btn"
-                                onClick={() => openCategoryPage(category)}
-                            >
+                            <button className="more-btn" onClick={() => openCategoryPage(category)}>
                                 More »
                             </button>
                         </div>
 
                         <div className="animated-list-container">
-                            <AnimatedList
-                                items={filteredItems.slice(0, 10)}
-                                onItemSelect={addItemToPreview}
-                            />
+                            <div style={{ display: 'flex', gap: '15px', padding: '10px 0' }}>
+                                {items.length === 0 ? (
+                                    <p style={{ color: '#999' }}>No items yet</p>
+                                ) : (
+                                    items.slice(0, 10).map((item, idx) => (
+                                        <motion.div
+                                            key={item._id || idx}
+                                            initial={{ scale: 0.8, opacity: 0 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            transition={{ delay: idx * 0.05 }}
+                                            style={{ cursor: 'pointer', flexShrink: 0 }}
+                                            onClick={() => addToPreview(item)}
+                                        >
+                                            <div className="item item-preview-box-animated">
+                                                <img src={item.imageUrl} alt={item.name} className="item-image" />
+                                            </div>
+                                        </motion.div>
+                                    ))
+                                )}
+                            </div>
                         </div>
                     </div>
                 );
