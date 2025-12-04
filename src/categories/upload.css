@@ -1,0 +1,153 @@
+/* --- WRAPPER --- */
+.upload-wrapper {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+
+  background: linear-gradient(
+    to right,
+    #007bff,
+    #3f9cff,
+    #7fbfff,
+    #bfe0ff,
+    #bfe0ff,
+    #7fbfff,
+    #3f9cff,
+    #007bff
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+/* --- CARD --- */
+.upload-card {
+  position: relative;
+  z-index: 2;
+
+  background: #ffffff;
+  width: 650px;        /* increased width */
+  max-width: 95%;
+  padding: 50px 45px;
+  border-radius: 25px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* --- BACK BUTTON --- */
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: #e0e6ff;
+  color: #5271ff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.back-btn:hover {
+  background: #d5ddff;
+  transform: translateX(-3px);
+}
+
+/* --- HEADER --- */
+.upload-card h1 {
+  margin-bottom: 25px;
+  color: #5271ff;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+/* --- INPUT FIELDS --- */
+.upload-card input[type="text"],
+.upload-card select {
+  width: 100%;           /* make item name textbox same width as category */
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px solid #ccc;
+  font-size: 1.1rem;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.upload-card input[type="text"]:focus,
+.upload-card select:focus {
+  border-color: #5271ff;
+  box-shadow: 0 5px 15px rgba(82, 113, 255, 0.25);
+}
+
+/* --- DRAG & DROP AREA --- */
+.drop-area {
+  width: 100%;
+  max-width: 400px;       /* smaller so it doesn’t overflow card */
+  margin: 0 auto;         /* center within card */
+  padding: 18px;           /* slightly smaller padding */
+  border: 2px dashed #5271ff;
+  border-radius: 16px;
+  color: #5271ff;
+  font-size: 1rem;        /* slightly smaller font */
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: rgba(82, 113, 255, 0.05);
+}
+
+.drop-area.drag-over {
+  background: rgba(82, 113, 255, 0.15);
+  border-color: #ff4e4e;
+  color: #ff4e4e;
+}
+
+/* --- BUTTON --- */
+.upload-card button.upload-btn {
+  width: 100%;
+  padding: 16px;
+  margin-top: 15px;
+  border: none;
+  border-radius: 16px;
+  background: #ff4e4e;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.upload-card button.upload-btn:hover {
+  background: #ff6767;
+  box-shadow: 0 6px 14px rgba(255, 80, 80, 0.35);
+}
+
+/* --- SMALLER SCREEN ADJUSTMENT --- */
+@media screen and (max-width: 600px) {
+  .upload-card {
+    width: 95%;
+    padding: 40px 25px;
+  }
+
+  .upload-card h1 {
+    font-size: 1.8rem;
+  }
+
+  .upload-card input[type="text"],
+  .upload-card select,
+  .drop-area {
+    font-size: 1rem;
+    padding: 12px 15px;
+  }
+
+  .upload-card button.upload-btn {
+    font-size: 1rem;
+    padding: 14px;
+  }
+}
