@@ -1,60 +1,99 @@
+/* --- WRAPPER --- */
 .profile-wrapper {
   width: 100vw;
   height: 100vh;
-  background: #f4f6ff;
+  background: linear-gradient(135deg, #073be6, #f8f9ff, #073be6);
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 20px;
 }
 
+/* --- CARD --- */
 .profile-card {
-  background: white;
-  width: 350px;
-  padding: 35px;
-  border-radius: 20px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  position: relative; /* Needed for the back button */
+  background: #ffffff;
+  width: 380px;
+  padding: 45px 35px;
+  border-radius: 22px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
   text-align: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
+.profile-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 35px rgba(0,0,0,0.15);
+}
+
+/* --- BACK BUTTON --- */
+.back-btn {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  background: #e0e6ff;
+  color: #5271ff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.back-btn:hover {
+  background: #d5ddff;
+  transform: translateX(-3px);
+}
+
+/* --- AVATAR --- */
 .profile-avatar {
-  color: #4a82ff;
-  margin-bottom: 15px;
+  font-size: 4rem;
+  color: #5271ff;
+  margin-bottom: 20px;
 }
 
+/* --- INFO TEXT --- */
 .profile-info {
-  font-size: 1.1rem;
-  color: #555;
-  margin: 5px 0;
+  font-size: 1.15rem;
+  color: #444;
+  margin: 8px 0;
+  font-weight: 500;
 }
 
+/* --- LOGOUT BUTTON --- */
 .logout-btn {
   width: 100%;
-  margin-top: 25px;
-  padding: 12px;
+  margin-top: 30px;
+  padding: 14px;
   border: none;
-  border-radius: 12px;
-  background: #d9534f;
-  color: white;
+  border-radius: 14px;
+  background: #ff4e4e;
+  color: #fff;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .logout-btn:hover {
-  background: #e66763;
+  background: #ff6767;
+  box-shadow: 0 6px 12px rgba(255, 80, 80, 0.35);
 }
 
+/* Secondary/Exit Button (Optional) */
 .exit-btn {
-  background-color: #ccc;
+  background-color: #e6e6e6;
   color: #333;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 10px 16px;
   margin-left: 10px;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .exit-btn:hover {
-  background-color: #bbb;
+  background-color: #d5d5d5;
 }

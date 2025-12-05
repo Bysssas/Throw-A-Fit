@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useUser } from "../categories/UserContext";
+import "./upload.css";
 
 export default function Upload() {
   const { user } = useUser();
+  const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [itemName, setItemName] = useState("");
   const [itemCategory, setItemCategory] = useState("tops");
+  const dropRef = useRef(null);
 
   const categories = ["tops", "bottoms", "shoes", "accessories"];
   const API_URL = process.env.REACT_APP_API_URL;
@@ -38,15 +42,78 @@ export default function Upload() {
     }
   };
 
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setFile(e.dataTransfer.files[0]);
+    }
+    dropRef.current.classList.remove("drag-over");
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropRef.current.classList.add("drag-over");
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropRef.current.classList.remove("drag-over");
+  };
+
   return (
-    <div>
-      <h1>Upload your Clothes!</h1>
-      <input type="text" placeholder="Item Name" value={itemName} onChange={e => setItemName(e.target.value)} />
-      <select value={itemCategory} onChange={e => setItemCategory(e.target.value)}>
-        {categories.map(cat => <option key={cat} value={cat}>{cat.toUpperCase()}</option>)}
-      </select>
-      <input type="file" accept="image/*" onChange={e => setFile(e.target.files[0])} />
-      <button onClick={handleUpload}>Upload</button>
+    <div className="upload-wrapper">
+      <div className="upload-card">
+        <button className="back-btn" onClick={() => navigate(-1)}>
+          ← Back
+        </button>
+
+        <h1>Upload your Clothes!</h1>
+
+        <input
+          type="text"
+          placeholder="Item Name"
+          value={itemName}
+          onChange={(e) => setItemName(e.target.value)}
+        />
+
+        <select
+          value={itemCategory}
+          onChange={(e) => setItemCategory(e.target.value)}
+        >
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat.toUpperCase()}
+            </option>
+          ))}
+        </select>
+
+        {/* Drag & Drop area */}
+        <div
+          ref={dropRef}
+          className="drop-area"
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onClick={() => document.getElementById("fileInput").click()}
+        >
+          {file ? file.name : "Drag & Drop file here or click to select"}
+        </div>
+
+        <input
+          type="file"
+          id="fileInput"
+          style={{ display: "none" }}
+          accept="image/*"
+          onChange={(e) => setFile(e.target.files[0])}
+        />
+
+        <button className="upload-btn" onClick={handleUpload}>
+          Upload
+        </button>
+      </div>
     </div>
   );
 }

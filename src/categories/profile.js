@@ -32,6 +32,10 @@ export default function Profile() {
   return (
     <div className="profile-wrapper">
       <div className="profile-card">
+
+        {/* BACK BUTTON */}
+        <button className="back-btn" onClick={() => navigate(-1)}>← Back</button>
+
         <FaUserCircle size={120} className="profile-avatar" />
         <h2>{user.username}</h2>
         <p className="profile-info">User ID: {user._id}</p>
