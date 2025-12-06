@@ -4,7 +4,8 @@ const ClosetContext = createContext();
 export const useCloset = () => useContext(ClosetContext);
 
 export const ClosetProvider = ({ children }) => {
-  const [previewItems, setPreviewItems] = useState([]);
+  const [closetItems, setClosetItems] = useState([]);       // all user items
+  const [previewItems, setPreviewItems] = useState([]);     // preview for drag/drop
   const [mainPreviewItem, setMainPreviewItem] = useState(null);
 
   // Add item to preview
@@ -33,11 +34,17 @@ export const ClosetProvider = ({ children }) => {
     );
   };
 
-  // Reset closet
-  const resetCloset = useCallback(() => {
+  // Reset preview
+  const resetPreview = useCallback(() => {
     setPreviewItems([]);
     setMainPreviewItem(null);
   }, []);
+
+  // **Reset Closet** (restore for Home)
+  const resetCloset = useCallback(() => {
+    resetPreview();
+    // Optionally, reset other closet-specific state here in the future
+  }, [resetPreview]);
 
   // Load user items from backend
   const loadUserItems = useCallback(async () => {
@@ -52,7 +59,8 @@ export const ClosetProvider = ({ children }) => {
       const items = await res.json();
 
       if (Array.isArray(items)) {
-        setPreviewItems(items.map(item => ({ ...item, x: 0, y: 0 })));
+        setClosetItems(items);                           // populate all items
+        setPreviewItems(items.map(item => ({ ...item, x: 0, y: 0 }))); // optional
         setMainPreviewItem(items[0] || null);
       }
     } catch (err) {
@@ -68,12 +76,15 @@ export const ClosetProvider = ({ children }) => {
   return (
     <ClosetContext.Provider
       value={{
+        closetItems,            // expose all items
+        setClosetItems,         // expose setter
         previewItems,
         mainPreviewItem,
         addItemToPreview,
         removeItemFromPreview,
         updateItemPosition,
-        resetCloset,
+        resetPreview,
+        resetCloset,           // <-- added back
         loadUserItems,
       }}
     >
