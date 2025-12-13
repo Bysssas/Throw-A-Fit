@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUserCircle } from "react-icons/fa";
+import { FaUserCircle, FaTrash } from "react-icons/fa";
 import { motion, useInView } from "framer-motion";
 import { useCloset } from "../categories/ClosetContext";
 import { useUser } from "../categories/UserContext";
@@ -15,7 +15,8 @@ const ENDPOINT_MAP = {
   Shoes: "/items/shoes",
 };
 
-const DraggablePreviewItem = ({ item, index, onDragStart, onRemove }) => {
+// ────────── Preview draggable item ──────────
+const DraggablePreviewItem = ({ item, index, onDragStart, onRemoveFromDB }) => {
   const ref = useRef(null);
 
   const handleMouseDown = (e) => {
@@ -26,7 +27,9 @@ const DraggablePreviewItem = ({ item, index, onDragStart, onRemove }) => {
 
   const handleContextMenu = (e) => {
     e.preventDefault();
-    onRemove(index);
+    if (window.confirm("Delete this item from your closet?")) {
+      onRemoveFromDB(item._id, item.category);
+    }
   };
 
   return (
@@ -43,7 +46,8 @@ const DraggablePreviewItem = ({ item, index, onDragStart, onRemove }) => {
   );
 };
 
-const AnimatedItem = ({ children, delay = 0, onClick }) => {
+// ────────── Animated list item ──────────
+const AnimatedItem = ({ children, delay = 0, onClick, onDelete }) => {
   const ref = useRef(null);
   const inView = useInView(ref, { amount: 0.5 });
 
@@ -54,14 +58,24 @@ const AnimatedItem = ({ children, delay = 0, onClick }) => {
       initial={{ scale: 0.7, opacity: 0 }}
       animate={inView ? { scale: 1, opacity: 1 } : { scale: 0.7, opacity: 0 }}
       transition={{ duration: 0.2, delay }}
-      style={{ cursor: "pointer", flexShrink: 0 }}
+      style={{ cursor: "pointer", flexShrink: 0, position: "relative" }}
     >
       {children}
+      {onDelete && (
+        <FaTrash
+          className="item-delete-icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+        />
+      )}
     </motion.div>
   );
 };
 
-const AnimatedList = ({ items = [], onItemSelect }) => (
+// ────────── Animated scrollable list ──────────
+const AnimatedList = ({ items = [], onItemSelect, onItemDelete }) => (
   <div className="scroll-list-container horizontal-list-wrapper">
     <div className="scroll-list" style={{ display: "flex", gap: "15px" }}>
       {items.map((item, index) => (
@@ -69,6 +83,7 @@ const AnimatedList = ({ items = [], onItemSelect }) => (
           key={item._id || `${item.name}-${index}`}
           delay={0.05 * index}
           onClick={() => onItemSelect(item)}
+          onDelete={onItemDelete ? () => onItemDelete(item) : null}
         >
           <div className="item item-preview-box-animated">
             {item.imageUrl ? (
@@ -159,6 +174,46 @@ export default function Closet() {
     fetchClothes();
   }, [user, resetCloset]);
 
+  // ─── DELETE ITEM FROM DATABASE ───
+  const deleteItemFromDB = async (itemId, category) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("No auth token found");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${BASE_API_URL}/items/${itemId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Failed to delete item: ${errText}`);
+      }
+
+      // Remove from clothesData
+      setClothesData((prev) => ({
+        ...prev,
+        [category]: prev[category].filter((item) => item._id !== itemId),
+      }));
+
+      // Remove from preview
+      removeItemFromPreviewById(itemId);
+    } catch (err) {
+      console.error("Delete error:", err);
+      setError(err.message || "Failed to delete item");
+    }
+  };
+
+  // ─── Helper: remove item from preview by ID ───
+  const removeItemFromPreviewById = (itemId) => {
+    const index = previewItems.findIndex((item) => item._id === itemId);
+    if (index !== -1) removeItemFromPreview(index);
+  };
+
+  // ─── DRAG & DROP ───
   const handleDragStart = (index, offsetX, offsetY) => {
     draggingRef.current = { index, offsetX, offsetY };
     window.addEventListener("mousemove", handleMouseMove);
@@ -206,7 +261,7 @@ export default function Closet() {
               item={item}
               index={i}
               onDragStart={handleDragStart}
-              onRemove={removeItemFromPreview}
+              onRemoveFromDB={deleteItemFromDB}
             />
           ))
         ) : mainPreviewItem?.imageUrl ? (
@@ -228,6 +283,11 @@ export default function Closet() {
               onItemSelect={(item) =>
                 addItemToPreview(item, previewRef.current?.offsetWidth, previewRef.current?.offsetHeight)
               }
+              onItemDelete={(item) => {
+                if (window.confirm("Delete this item from your closet?")) {
+                  deleteItemFromDB(item._id, category);
+                }
+              }}
             />
           </div>
         </div>

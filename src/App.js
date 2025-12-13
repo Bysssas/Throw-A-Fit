@@ -1,35 +1,39 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./categories/home.js";
-import Upload from "./categories/upload.js";
-import Closet from "./categories/closet.js";
-import CategoryPage from "./categories/CategoryPage.js";
-import { ClosetProvider } from "./categories/ClosetContext.js";
-import Profile from "./categories/profile.js";
-import { UserProvider } from "./categories/UserContext.js";
+
+// Pages
+import Home from "./categories/home";
+import Upload from "./categories/upload";
+import Closet from "./categories/closet";
+import CategoryPage from "./categories/CategoryPage";
+import Profile from "./categories/profile";
+
+// Context Providers
+import { UserProvider } from "./categories/UserContext";
+import { ClosetProvider } from "./categories/ClosetContext";
 
 export default function App() {
   return (
-    <ClosetProvider>
-      <UserProvider>
+    <UserProvider>
+      <ClosetProvider>
         <BrowserRouter>
           <Routes>
-            {/* Home */}
+            {/* Home Page */}
             <Route path="/" element={<Home />} />
 
-            {/* Upload */}
+            {/* Upload Page */}
             <Route path="/upload" element={<Upload />} />
 
-            {/* Closet */}
+            {/* Closet Page */}
             <Route path="/closet" element={<Closet />} />
 
-            {/* Profile */}
+            {/* Profile Page */}
             <Route path="/profile" element={<Profile />} />
 
-            {/* Dynamic category pages */}
+            {/* Dynamic Category Pages */}
             <Route path="/items/:category" element={<CategoryPage />} />
           </Routes>
         </BrowserRouter>
-      </UserProvider>
-    </ClosetProvider>
+      </ClosetProvider>
+    </UserProvider>
   );
 }

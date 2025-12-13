@@ -171,10 +171,27 @@
   background-color: #170d27;
   border-radius: 8px;
   margin-bottom: 1rem;
+  position: relative;
 }
 
 .item.selected {
   background-color: #271e37;
+}
+
+.item-delete-icon {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-size: 18px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  padding: 2px;
+}
+
+.item-delete-icon:hover {
+  color: #ff5252;
 }
 
 .item-text {

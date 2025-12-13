@@ -97,3 +97,102 @@
 .exit-btn:hover {
   background-color: #d5d5d5;
 }
+
+/* --- EDIT BUTTON --- */
+.edit-btn {
+  background: #5271ff;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: all 0.25s ease;
+}
+
+.edit-btn:hover {
+  background: #3654d6;
+  transform: translateY(-2px);
+}
+
+/* --- SAVE BUTTON --- */
+.save-btn {
+  background: #27ae60;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: all 0.25s ease;
+}
+
+.save-btn:hover {
+  background: #1e8449;
+  transform: translateY(-2px);
+}
+
+/* --- CANCEL BUTTON --- */
+.cancel-btn {
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.cancel-btn:hover {
+  background: #cfcfcf;
+  transform: translateY(-2px);
+}
+
+/* --- INPUT FIELD --- */
+.edit-name-input {
+  width: 80%;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.25s ease;
+}
+
+.edit-name-input:focus {
+  border-color: #5271ff;
+  box-shadow: 0 0 5px rgba(82, 113, 255, 0.5);
+}
+
+/* --- ERROR MESSAGE --- */
+.error-message {
+  color: #ff4e4e;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+/* --- INLINE PENCIL ICON --- */
+.edit-pencil {
+  margin-left: 8px;
+  color: #5271ff;
+  cursor: pointer;
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.edit-pencil:hover {
+  color: #3654d6;
+  transform: translateY(-2px);
+}
+
+/* Optional: adjust username spacing */
+.username {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
