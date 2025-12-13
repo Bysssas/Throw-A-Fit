@@ -94,7 +94,7 @@ export default function Profile() {
           </h2>
         )}
 
-        <p className="profile-info">User ID: {user._id}</p>
+        <p className="profile-info"></p>
         <button className="logout-btn" onClick={handleLogout}>Logout</button>
       </div>
     </div>

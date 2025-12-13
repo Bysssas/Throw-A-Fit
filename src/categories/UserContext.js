@@ -2,26 +2,31 @@ import { createContext, useContext, useState, useEffect } from "react";
 
 const UserContext = createContext();
 
-// Named export for the hook
+// Hook
 export const useUser = () => useContext(UserContext);
 
-// Named export for the provider
+// Provider
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  // Load user from token on mount
+  /* ---------------- LOAD USER FROM TOKEN ---------------- */
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
     const fetchUser = async () => {
       try {
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          `${process.env.REACT_APP_API_URL}/auth/me`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!res.ok) {
-          console.warn("Failed /auth/me:", res.status);
           localStorage.removeItem("token");
           setUser(null);
           return;
@@ -39,46 +44,52 @@ export const UserProvider = ({ children }) => {
     fetchUser();
   }, []);
 
-  // --- LOGOUT ---
+  /* ---------------- LOGOUT ---------------- */
+
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
   };
 
-  // --- UPDATE USERNAME ---
-  const updateUserName = async (newName) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found");
+  /* ---------------- UPDATE USERNAME ---------------- */
 
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/update-name`, {
+  const updateUserName = async (newName) => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Not authenticated");
+
+    const res = await fetch(
+      `${process.env.REACT_APP_API_URL}/auth/update-name`,
+      {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name: newName }),
-      });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.msg || "Failed to update username");
+        body: JSON.stringify({ username: newName }),
       }
+    );
 
-      const updatedUser = await res.json();
+    const data = await res.json();
 
-      // Sync frontend with backend result
-      setUser(updatedUser);
-
-      return true;
-    } catch (err) {
-      console.error("Failed to update username:", err);
-      throw err;
+    if (!res.ok) {
+      throw new Error(data.msg || "Failed to update username");
     }
+
+    // Sync frontend user with backend
+    setUser(data.user);
+
+    return data.user;
   };
 
   return (
-    <UserContext.Provider value={{ user, setUser, logout, updateUserName }}>
+    <UserContext.Provider
+      value={{
+        user,
+        setUser,
+        logout,
+        updateUserName,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

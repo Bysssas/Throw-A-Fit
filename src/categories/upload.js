@@ -6,17 +6,75 @@ import "./upload.css";
 export default function Upload() {
   const { user } = useUser();
   const navigate = useNavigate();
+
   const [file, setFile] = useState(null);
   const [itemName, setItemName] = useState("");
   const [itemCategory, setItemCategory] = useState("tops");
+  const [warning, setWarning] = useState("");
+
   const dropRef = useRef(null);
 
   const categories = ["tops", "bottoms", "shoes", "accessories"];
   const API_URL = process.env.REACT_APP_API_URL;
 
+  /* ---------------- IMAGE VALIDATION ---------------- */
+
+  const validateClothingImage = (file) => {
+    const name = file.name.toLowerCase();
+    const clothingKeywords = [
+      "shirt",
+      "pants",
+      "jeans",
+      "shoe",
+      "top",
+      "dress",
+      "skirt",
+      "jacket",
+      "hoodie",
+      "sneaker"
+    ];
+
+    const hasKeyword = clothingKeywords.some(k => name.includes(k));
+
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+
+      img.onload = () => {
+        const isVertical = img.height > img.width;
+        const isLargeEnough = img.width > 200 && img.height > 200;
+
+        if (!hasKeyword && (!isVertical || !isLargeEnough)) {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      };
+    });
+  };
+
+  const handleFileSelect = async (selectedFile) => {
+    if (!selectedFile) return;
+
+    setFile(selectedFile);
+
+    const looksLikeClothes = await validateClothingImage(selectedFile);
+
+    if (!looksLikeClothes) {
+      setWarning(
+        "⚠️ This image may not be clothing. Please upload clothing items only."
+      );
+    } else {
+      setWarning("");
+    }
+  };
+
+  /* ---------------- UPLOAD ---------------- */
+
   const handleUpload = async () => {
     if (!user) return alert("You must be logged in to upload items!");
-    if (!file || !itemName || !itemCategory) return alert("Complete all fields!");
+    if (!file || !itemName || !itemCategory)
+      return alert("Complete all fields!");
 
     const token = localStorage.getItem("token");
     const formData = new FormData();
@@ -30,24 +88,32 @@ export default function Upload() {
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
+
       if (!res.ok) throw new Error("Upload failed");
+
       const data = await res.json();
       alert(`Upload complete! Item: ${data.item.name}`);
+
       setFile(null);
       setItemName("");
       setItemCategory("tops");
+      setWarning("");
     } catch (err) {
       console.error(err);
       alert("Upload failed. Check console.");
     }
   };
 
+  /* ---------------- DRAG & DROP ---------------- */
+
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
+      handleFileSelect(e.dataTransfer.files[0]);
     }
+
     dropRef.current.classList.remove("drag-over");
   };
 
@@ -62,6 +128,8 @@ export default function Upload() {
     e.stopPropagation();
     dropRef.current.classList.remove("drag-over");
   };
+
+  /* ---------------- UI ---------------- */
 
   return (
     <div className="upload-wrapper">
@@ -90,7 +158,7 @@ export default function Upload() {
           ))}
         </select>
 
-        {/* Drag & Drop area */}
+        {/* Drag & Drop Area */}
         <div
           ref={dropRef}
           className="drop-area"
@@ -102,12 +170,14 @@ export default function Upload() {
           {file ? file.name : "Drag & Drop file here or click to select"}
         </div>
 
+        {warning && <p className="upload-warning">{warning}</p>}
+
         <input
           type="file"
           id="fileInput"
           style={{ display: "none" }}
           accept="image/*"
-          onChange={(e) => setFile(e.target.files[0])}
+          onChange={(e) => handleFileSelect(e.target.files[0])}
         />
 
         <button className="upload-btn" onClick={handleUpload}>

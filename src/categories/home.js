@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa";
 import "./hpbg.css";
 import { TextPressure, FallingText } from "./hpbg";
-import Squares from './hpbg';
+import Squares from "./hpbg";
 import { useCloset } from "../categories/ClosetContext";
 import { useUser } from "../categories/UserContext";
 
@@ -17,12 +17,23 @@ export default function Home() {
   const [showLogin, setShowLogin] = useState(false);
   const [showFitOptions, setShowFitOptions] = useState(false);
   const [showFitPopup, setShowFitPopup] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
 
   const [signupUsername, setSignupUsername] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
   const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [resetUserId, setResetUserId] = useState("");
+  const [resetToken, setResetToken] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+
+  /* MESSAGE + LOADING */
+  const [isLoading, setIsLoading] = useState(false);
+  const [showMessagePopup, setShowMessagePopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
 
   const [fitOptions, setFitOptions] = useState({
     fullRandom: false,
@@ -40,9 +51,12 @@ export default function Home() {
   const isLoggedIn = !!user;
 
   useEffect(() => {
-    setFitPreviewItems(selectedFitItems.map(item => ({ ...item, x: 0, y: 0 })));
+    setFitPreviewItems(
+      selectedFitItems.map(item => ({ ...item, x: 0, y: 0 }))
+    );
   }, [selectedFitItems]);
 
+  /* ---------------- DRAG ---------------- */
   const handleDragStart = (index, e) => {
     const rect = e.target.getBoundingClientRect();
     draggingRef.current = {
@@ -79,142 +93,175 @@ export default function Home() {
     window.removeEventListener("mouseup", handleMouseUp);
   };
 
+  /* ---------------- AUTH ---------------- */
   const handleSignup = async () => {
+    setShowSignup(false);
+    setIsLoading(true);
+
     try {
       const res = await fetch(`${API_URL}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: signupUsername, password: signupPassword }),
+        body: JSON.stringify({
+          username: signupUsername,
+          email: signupEmail,
+          password: signupPassword,
+        }),
       });
+
       const data = await res.json();
-      if (res.ok) {
-        setMessage("Signup successful! You can now log in.");
-        setShowSignup(false);
-        setSignupUsername("");
-        setSignupPassword("");
-      } else {
-        setMessage(data.msg || "Signup failed");
-      }
-    } catch (err) {
-      console.error(err);
-      setMessage("Server error during signup");
+
+      setTimeout(() => {
+        setIsLoading(false);
+        setPopupMessage(
+          res.ok
+            ? "Signup successful! You can now log in."
+            : data.msg || "Signup failed"
+        );
+        if (res.ok) {
+          setSignupUsername("");
+          setSignupEmail("");
+          setSignupPassword("");
+        }
+        setShowMessagePopup(true);
+      }, 600);
+    } catch {
+      setTimeout(() => {
+        setIsLoading(false);
+        setPopupMessage("Server error during signup");
+        setShowMessagePopup(true);
+      }, 600);
     }
   };
 
   const handleLogin = async () => {
+    setShowLogin(false);
+    setIsLoading(true);
+
     try {
       const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: loginUsername, password: loginPassword }),
+        body: JSON.stringify({
+          username: loginUsername,
+          password: loginPassword,
+        }),
       });
+
       const data = await res.json();
+
       if (!res.ok) {
-        setMessage(data.msg || "Login failed");
+        setTimeout(() => {
+          setIsLoading(false);
+          setPopupMessage(data.msg || "Login failed");
+          setShowMessagePopup(true);
+        }, 600);
         return;
       }
 
       localStorage.setItem("token", data.token);
 
-      const userRes = await fetch(`${API_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${data.token}` },
-      });
-      if (userRes.ok) {
-        const userData = await userRes.json();
-        setUser({ _id: userData._id, username: userData.username });
-      } else {
-        setMessage("Failed to fetch user info");
-        return;
-      }
+      setUser({ _id: data.user._id, username: data.user.username });
 
-      const itemsRes = await fetch(`${API_URL}/items/user`, {
-        headers: { Authorization: `Bearer ${data.token}` },
-      });
-      if (itemsRes.ok) {
-        const items = await itemsRes.json();
-        if (Array.isArray(items)) setClosetItems(items);
-      }
-
-      setMessage("Login successful!");
-      setShowLogin(false);
-      setLoginUsername("");
-      setLoginPassword("");
-    } catch (err) {
-      console.error(err);
-      setMessage("Server error during login");
+      setTimeout(() => {
+        setIsLoading(false);
+        setPopupMessage("Login successful!");
+        setLoginUsername("");
+        setLoginPassword("");
+        setShowMessagePopup(true);
+      }, 600);
+    } catch {
+      setTimeout(() => {
+        setIsLoading(false);
+        setPopupMessage("Server error during login");
+        setShowMessagePopup(true);
+      }, 600);
     }
   };
 
+  const handleForgotPassword = async () => {
+    setShowForgotPassword(false);
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+      const data = await res.json();
+      setTimeout(() => {
+        setIsLoading(false);
+        setPopupMessage(res.ok ? "Verification email sent! Check your inbox." : data.msg || "Failed to send verification");
+        setShowMessagePopup(true);
+        if (res.ok) setResetUserId(data.userId); // if backend returns userId
+        setForgotEmail("");
+      }, 600);
+    } catch {
+      setTimeout(() => { setIsLoading(false); setPopupMessage("Server error during password reset"); setShowMessagePopup(true); }, 600);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    setShowResetPassword(false);
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/auth/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: resetUserId, token: resetToken, newPassword }),
+      });
+      const data = await res.json();
+      setTimeout(() => {
+        setIsLoading(false);
+        setPopupMessage(res.ok ? "Password reset successful!" : data.msg || "Reset failed");
+        setShowMessagePopup(true);
+        setResetToken(""); setNewPassword("");
+      }, 600);
+    } catch {
+      setTimeout(() => { setIsLoading(false); setPopupMessage("Server error during password reset"); setShowMessagePopup(true); }, 600);
+    }
+  };
+
+  /* ---------------- FIT ---------------- */
   const handleOptionChange = (type, value) => {
     if (type === "fullRandom") {
       setFitOptions(prev => ({ ...prev, fullRandom: !prev.fullRandom }));
-    } else if (type === "colors") {
+    } else {
       setFitOptions(prev => ({
         ...prev,
-        colors: prev.colors.includes(value)
-          ? prev.colors.filter(c => c !== value)
-          : [...prev.colors, value]
-      }));
-    } else if (type === "styles") {
-      setFitOptions(prev => ({
-        ...prev,
-        styles: prev.styles.includes(value)
-          ? prev.styles.filter(s => s !== value)
-          : [...prev.styles, value]
+        [type]: prev[type].includes(value)
+          ? prev[type].filter(v => v !== value)
+          : [...prev[type], value],
       }));
     }
   };
 
-  const throwAFit = (options) => {
-    if (!closetItems || closetItems.length === 0) {
-      setMessage("Your closet is empty!");
+  const throwAFit = () => {
+    if (!closetItems.length) {
+      setPopupMessage("Your closet is empty!");
+      setShowMessagePopup(true);
       return;
     }
 
-    let filteredItems = [...closetItems];
-    if (!options.fullRandom) {
-      if (options.colors.length > 0)
-        filteredItems = filteredItems.filter(item =>
-          item.name && options.colors.some(color => item.name.toLowerCase().includes(color.toLowerCase()))
-        );
-      if (options.styles.length > 0)
-        filteredItems = filteredItems.filter(item =>
-          item.name && options.styles.some(style => item.name.toLowerCase().includes(style.toLowerCase()))
-        );
-    }
-
-    if (!filteredItems.length) {
-      setMessage("No items matched your selection!");
-      return;
-    }
-
-    const buckets = {
-      tops: filteredItems.filter(item => item.name && /(top|shirt|t-shirt|blouse)/i.test(item.name)),
-      bottoms: filteredItems.filter(item => item.name && /(bottom|pants|skirt|jeans|shorts|joggers)/i.test(item.name)),
-      shoes: filteredItems.filter(item => item.name && /(shoe|sneaker|boot|heel)/i.test(item.name)),
-      accessories: filteredItems.filter(item => item.name && /(hat|cap|scarf|bag|belt)/i.test(item.name)),
+    const categories = {
+      tops: /(top|shirt|t-shirt|blouse)/i,
+      bottoms: /(pants|jeans|shorts|skirt|joggers)/i,
+      shoes: /(shoe|sneaker|boot|heel)/i,
+      accessories: /(hat|bag|belt|scarf)/i,
     };
 
-    const hasAnyItems = Object.values(buckets).some(bucket => bucket.length > 0);
-    if (!hasAnyItems) {
-      setMessage("Your closet has no usable items!");
-      return;
-    }
+    const selected = Object.values(categories)
+      .map(r => closetItems.filter(i => r.test(i.name)))
+      .filter(b => b.length)
+      .map(b => b[Math.floor(Math.random() * b.length)]);
 
-    const selectedFit = [];
-    for (let category in buckets) {
-      const bucket = buckets[category];
-      if (bucket.length > 0) selectedFit.push(bucket[Math.floor(Math.random() * bucket.length)]);
-    }
-
-    setSelectedFitItems(selectedFit);
+    setSelectedFitItems(selected);
     setShowFitPopup(true);
-    setMessage("");
   };
 
   return (
     <div className="home-container">
-      <Squares speed={0.5} squareSize={40} direction='diagonal' borderColor='#fff' hoverFillColor='#222' />
+      <Squares speed={0.5} squareSize={40} direction="diagonal" />
 
       {!isLoggedIn && (
         <div className="top-right-btns">
@@ -225,16 +272,12 @@ export default function Home() {
 
       {isLoggedIn && (
         <div className="home-profile-icon" onClick={() => navigate("/profile")}>
-          <FaUserCircle size={38} className="profile-icon-react" />
+          <FaUserCircle size={38} />
         </div>
       )}
 
       <div className="home-header" onClick={() => setFallen(true)}>
-        {!fallen ? (
-          <TextPressure text="Throw A Fit" fontFamily="Compressa VF" textColor="#e44a8dff" strokeColor="#FF0000" />
-        ) : (
-          <FallingText text="Throw A Fit" trigger="auto" backgroundColor="transparent" wireframes={false} gravity={0.56} fontSize="5rem" mouseConstraintStiffness={0.9} />
-        )}
+        {!fallen ? <TextPressure text="Throw A Fit" /> : <FallingText text="Throw A Fit" trigger="auto" />}
       </div>
 
       <div className="home-footer">
@@ -243,123 +286,75 @@ export default function Home() {
         <button className="home-btn secondary" onClick={() => navigate("/upload")}>Upload</button>
       </div>
 
-      {message && <div className="home-message">{message}</div>}
+      {/* LOADING */}
+      {isLoading && (
+        <div className="popup-overlay">
+          <div className="loading-popup-box">
+            <div className="loading-spinner" />
+            <p>Loading...</p>
+          </div>
+        </div>
+      )}
 
-      {/* SIGNUP POPUP */}
+      {/* MESSAGE */}
+      {showMessagePopup && (
+        <div className="popup-overlay">
+          <div className="message-popup-box">
+            <button className="message-popup-close" onClick={() => setShowMessagePopup(false)}>✕</button>
+            <p>{popupMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* SIGNUP */}
       {showSignup && (
         <div className="popup-overlay">
           <div className="popup-box">
             <div className="popup-header">Sign Up</div>
-            <input type="text" placeholder="Username" className="popup-input" value={signupUsername} onChange={e => setSignupUsername(e.target.value)} />
-            <input type="password" placeholder="Password" className="popup-input" value={signupPassword} onChange={e => setSignupPassword(e.target.value)} />
+            <input className="popup-input" placeholder="Username" value={signupUsername} onChange={e => setSignupUsername(e.target.value)} />
+            <input className="popup-input" type="email" placeholder="Email" value={signupEmail} onChange={e => setSignupEmail(e.target.value)} />
+            <input className="popup-input" type="password" placeholder="Password" value={signupPassword} onChange={e => setSignupPassword(e.target.value)} />
             <button className="popup-btn" onClick={handleSignup}>Create Account</button>
             <button className="popup-close" onClick={() => setShowSignup(false)}>Close</button>
           </div>
         </div>
       )}
 
-      {/* LOGIN POPUP */}
+      {/* LOGIN */}
       {showLogin && (
         <div className="popup-overlay">
           <div className="popup-box">
             <div className="popup-header">Login</div>
-            <input type="text" placeholder="Username" className="popup-input" value={loginUsername} onChange={e => setLoginUsername(e.target.value)} />
-            <input type="password" placeholder="Password" className="popup-input" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} />
+            <input className="popup-input" placeholder="Username" value={loginUsername} onChange={e => setLoginUsername(e.target.value)} />
+            <input className="popup-input" type="password" placeholder="Password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} />
             <button className="popup-btn" onClick={handleLogin}>Login</button>
+            <p className="forgot-password-link" onClick={() => { setShowLogin(false); setShowForgotPassword(true); }}>Forgot Password?</p>
             <button className="popup-close" onClick={() => setShowLogin(false)}>Close</button>
           </div>
         </div>
       )}
 
-      {/* FIT OPTIONS POPUP */}
-      {showFitOptions && (
-        <div className="fit-popup-overlay">
-          <div className="fit-popup-box">
-            <div className="fit-popup-header">Choose Fit Options</div>
-
-            <div className="fit-popup-section">
-              <label>
-                <input 
-                  type="checkbox" 
-                  checked={fitOptions.fullRandom} 
-                  onChange={() => handleOptionChange("fullRandom")} 
-                />
-                Full Random
-              </label>
-            </div>
-
-            <div className="fit-popup-section">
-              <p>Colors:</p>
-              {["Red","Blue","Green","Black"].map(color => (
-                <label key={color}>
-                  <input 
-                    type="checkbox" 
-                    checked={fitOptions.colors.includes(color)} 
-                    onChange={() => handleOptionChange("colors", color)} 
-                  />
-                  {color}
-                </label>
-              ))}
-            </div>
-
-            <div className="fit-popup-section">
-              <p>Styles:</p>
-              {["Top","Bottom","Shoes","Accessories"].map(style => (
-                <label key={style}>
-                  <input 
-                    type="checkbox" 
-                    checked={fitOptions.styles.includes(style)} 
-                    onChange={() => handleOptionChange("styles", style)} 
-                  />
-                  {style}
-                </label>
-              ))}
-            </div>
-
-            <button 
-              className="fit-popup-btn" 
-              onClick={() => {
-                throwAFit(fitOptions);
-                setShowFitOptions(false);
-              }}
-            >
-              Show Fit Preview
-            </button>
-
-            <button className="fit-popup-close" onClick={() => setShowFitOptions(false)}>Close</button>
+      {/* FORGOT PASSWORD */}
+      {showForgotPassword && (
+        <div className="popup-overlay">
+          <div className="popup-box">
+            <div className="popup-header">Forgot Password</div>
+            <input className="popup-input" type="email" placeholder="Registered Email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} />
+            <button className="popup-btn" onClick={handleForgotPassword}>Send Verification</button>
+            <button className="popup-close" onClick={() => setShowForgotPassword(false)}>Close</button>
           </div>
         </div>
       )}
 
-      {/* FIT PREVIEW POPUP */}
-      {showFitPopup && (
-        <div className="fit-popup-overlay">
-          <div className="fit-popup-box">
-            <div className="fit-popup-header">Your Fit Preview</div>
-            <div
-              className="fit-preview-container"
-              ref={fitPreviewRef}
-              style={{ position: "relative", width: "100%", height: "400px" }}
-            >
-              {fitPreviewItems.map((item, index) => (
-                <img
-                  key={item._id || `${item.name}-${index}`}
-                  src={item.imageUrl}
-                  alt={item.name}
-                  className="fit-item-preview"
-                  style={{
-                    position: "absolute",
-                    top: item.y,
-                    left: item.x,
-                    cursor: "grab",
-                    zIndex: index + 10,
-                  }}
-                  onMouseDown={(e) => handleDragStart(index, e)}
-                  draggable={false}
-                />
-              ))}
-            </div>
-            <button className="fit-popup-close" onClick={() => setShowFitPopup(false)}>Close</button>
+      {/* RESET PASSWORD */}
+      {showResetPassword && (
+        <div className="popup-overlay">
+          <div className="popup-box">
+            <div className="popup-header">Reset Password</div>
+            <input className="popup-input" placeholder="Verification Token" value={resetToken} onChange={e => setResetToken(e.target.value)} />
+            <input className="popup-input" type="password" placeholder="New Password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+            <button className="popup-btn" onClick={handleResetPassword}>Reset Password</button>
+            <button className="popup-close" onClick={() => setShowResetPassword(false)}>Close</button>
           </div>
         </div>
       )}

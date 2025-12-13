@@ -151,3 +151,10 @@
     padding: 14px;
   }
 }
+
+.upload-warning {
+  margin-top: 10px;
+  color: #ff4d4d;
+  font-size: 0.85rem;
+  text-align: center;
+}
