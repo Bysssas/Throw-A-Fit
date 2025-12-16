@@ -47,6 +47,7 @@ To be completed:
 -Fixing of logic in closet, currently it is showing all the sample items in the database in every category.
 -backend of sign up and login (including database connection)
 
-
+## December 11 - Presentation Day
+Before the presentation day, all the task were finished, and was able to show the completed web application and meet the goal for Throw A Fit Web App.
 ## Conclusion
 With significant backend and early frontend components already in place, the Throw A Fit project has made steady progress toward its predetermined milestones. In order to produce a web application that is both functional and aesthetically pleasing, the following phases will prioritize completing thorough testing, guaranteeing API integration, and finalizing the user interface design.
