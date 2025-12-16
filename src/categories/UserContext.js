@@ -8,8 +8,11 @@ export const useUser = () => useContext(UserContext);
 // Provider
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const API_URL = process.env.REACT_APP_API_URL;
 
-  /* ---------------- LOAD USER FROM TOKEN ---------------- */
+  /* ======================
+     LOAD USER FROM TOKEN
+  ====================== */
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -17,14 +20,11 @@ export const UserProvider = ({ children }) => {
 
     const fetchUser = async () => {
       try {
-        const res = await fetch(
-          `${process.env.REACT_APP_API_URL}/auth/me`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await fetch(`${API_URL}/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!res.ok) {
           localStorage.removeItem("token");
@@ -42,32 +42,33 @@ export const UserProvider = ({ children }) => {
     };
 
     fetchUser();
-  }, []);
+  }, [API_URL]);
 
-  /* ---------------- LOGOUT ---------------- */
+  /* ======================
+     LOGOUT
+  ====================== */
 
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
   };
 
-  /* ---------------- UPDATE USERNAME ---------------- */
+  /* ======================
+     UPDATE USERNAME
+  ====================== */
 
   const updateUserName = async (newName) => {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("Not authenticated");
 
-    const res = await fetch(
-      `${process.env.REACT_APP_API_URL}/auth/update-name`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ username: newName }),
-      }
-    );
+    const res = await fetch(`${API_URL}/auth/update-name`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ username: newName }),
+    });
 
     const data = await res.json();
 
@@ -75,10 +76,36 @@ export const UserProvider = ({ children }) => {
       throw new Error(data.msg || "Failed to update username");
     }
 
-    // Sync frontend user with backend
     setUser(data.user);
-
     return data.user;
+  };
+
+  /* ======================
+     DELETE ACCOUNT
+  ====================== */
+
+  const deleteAccount = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Not authenticated");
+
+    const res = await fetch(`${API_URL}/auth/delete`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.msg || "Failed to delete account");
+    }
+
+    // Clear local state on success
+    localStorage.removeItem("token");
+    setUser(null);
+
+    return data.msg;
   };
 
   return (
@@ -88,6 +115,7 @@ export const UserProvider = ({ children }) => {
         setUser,
         logout,
         updateUserName,
+        deleteAccount,
       }}
     >
       {children}

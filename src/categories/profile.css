@@ -196,3 +196,22 @@
   align-items: center;
   gap: 6px;
 }
+
+.delete-btn {
+  margin-top: 15px;
+  background-color: #c0392b;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background-color: #e74c3c;
+}
+
+.delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
