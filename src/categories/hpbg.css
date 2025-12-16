@@ -309,3 +309,61 @@
   height: 100%;
   z-index: 0;
 }
+
+.fit-popup-box {
+  width: 500px;
+  height: 500px;
+  overflow: hidden;
+  position: relative;
+}
+
+.fit-preview-container {
+  position: relative;
+  width: 500px;
+  height: 600px;
+  margin: auto;
+}
+
+.fit-zone {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+}
+
+.fit-zone.tops {
+  top: 0;
+  width: 100%;
+}
+
+.fit-zone.bottoms {
+  top: 180px;
+  width: 100%;
+}
+
+.fit-zone.shoes {
+  top: 360px;
+  width: 100%;
+}
+
+.fit-zone.accessories {
+  top: 80px;
+  right: -90px;
+  flex-direction: column;
+}
+
+.fit-preview-img {
+  width: 120px;
+  cursor: grab;
+}
+
+.popup-header .popup-close {
+  position: absolute;
+  top: 5%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+

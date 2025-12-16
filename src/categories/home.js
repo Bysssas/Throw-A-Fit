@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa";
 import "./hpbg.css";
@@ -6,6 +6,8 @@ import { TextPressure, FallingText } from "./hpbg";
 import Squares from "./hpbg";
 import { useCloset } from "../categories/ClosetContext";
 import { useUser } from "../categories/UserContext";
+import Draggable from "react-draggable";
+
 
 export default function Home() {
   const navigate = useNavigate();
@@ -18,6 +20,16 @@ export default function Home() {
   const [showFitOptions, setShowFitOptions] = useState(false);
   const [showFitPopup, setShowFitPopup] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetToken, setResetToken] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const fitItemRefs = useRef({})
+  const topRef = useRef(null);
+const bottomRef = useRef(null);
+const shoesRef = useRef(null);
+const accessoryRef = useRef(null);
+
+
 
   const [signupUsername, setSignupUsername] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
@@ -37,7 +49,8 @@ export default function Home() {
     styles: [],
   });
 
-  const [selectedFitItems, setSelectedFitItems] = useState([]);
+  const [selectedFitItems, setSelectedFitItems] = useState({});
+
 
   const API_URL = process.env.REACT_APP_API_URL;
   const isLoggedIn = !!user;
@@ -72,6 +85,86 @@ export default function Home() {
     }
   };
 
+  const handleSignup = async () => {
+  setShowSignup(false);
+  setIsLoading(true);
+
+  try {
+    const res = await fetch(`${API_URL}/auth/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: signupUsername,
+        email: signupEmail,
+        password: signupPassword,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.msg || "Signup failed");
+
+    setPopupMessage("Account created successfully!");
+  } catch (err) {
+    setPopupMessage(err.message || "Signup failed");
+  } finally {
+    setIsLoading(false);
+    setShowMessagePopup(true);
+  }
+};
+
+const handleForgotPassword = async () => {
+  setIsLoading(true);
+
+  try {
+    const res = await fetch(`${API_URL}/auth/forgot-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: forgotEmail }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.msg || "Request failed");
+
+    setPopupMessage("Verification token sent to email");
+    setShowForgotPassword(false);
+    setShowResetPassword(true);
+  } catch (err) {
+    setPopupMessage(err.message || "Request failed");
+  } finally {
+    setIsLoading(false);
+    setShowMessagePopup(true);
+  }
+};
+
+const handleResetPassword = async () => {
+  setIsLoading(true);
+
+  try {
+    const res = await fetch(`${API_URL}/auth/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: resetToken,
+        newPassword,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.msg || "Reset failed");
+
+    setPopupMessage("Password reset successful");
+    setShowResetPassword(false);
+    setResetToken("");
+    setNewPassword("");
+  } catch (err) {
+    setPopupMessage(err.message || "Reset failed");
+  } finally {
+    setIsLoading(false);
+    setShowMessagePopup(true);
+  }
+};
+
+
   /* ---------------- THROW A FIT ---------------- */
 
   const generateFit = async () => {
@@ -98,7 +191,7 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to generate fit");
 
-      setSelectedFitItems(Object.values(data.outfit).filter(Boolean));
+      setSelectedFitItems(data.outfit);
       setShowFitPopup(true);
     } catch (err) {
       setPopupMessage(err.message);
@@ -232,25 +325,43 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      {/* FIT RESULT */}
+      {/* FIT PREVIEW */}
       {showFitPopup && (
         <div className="popup-overlay">
-          <div className="popup-box">
-            <div className="popup-header">Your Fit</div>
-            {selectedFitItems.map(item => (
-              <img
-                key={item._id}
-                src={item.imageUrl}
-                alt={item.name}
-                className="fit-preview-img"
-              />
-            ))}
-            <button className="popup-close" onClick={() => setShowFitPopup(false)}>Close</button>
+          <div className="popup-box fit-popup-box">
+            <div className="popup-header">
+              Your Fit
+              <button className="popup-close" onClick={() => setShowFitPopup(false)}>✕</button>
+            </div>
+
+            <div className="fit-preview-container">
+              {selectedFitItems.top && (
+                <Draggable nodeRef={topRef}>
+                  <img ref={topRef} src={selectedFitItems.top.imageUrl} className="fit-preview-img tops" alt="top" />
+                </Draggable>
+              )}
+
+              {selectedFitItems.bottom && (
+                <Draggable nodeRef={bottomRef}>
+                  <img ref={bottomRef} src={selectedFitItems.bottom.imageUrl} className="fit-preview-img bottoms" alt="bottom" />
+                </Draggable>
+              )}
+
+              {selectedFitItems.shoes && (
+                <Draggable nodeRef={shoesRef}>
+                  <img ref={shoesRef} src={selectedFitItems.shoes.imageUrl} className="fit-preview-img shoes" alt="shoes" />
+                </Draggable>
+              )}
+
+              {selectedFitItems.accessory && (
+                <Draggable nodeRef={accessoryRef}>
+                  <img ref={accessoryRef} src={selectedFitItems.accessory.imageUrl} className="fit-preview-img accessories" alt="accessory" />
+                </Draggable>
+              )}
+            </div>
           </div>
         </div>
       )}
-
       {/* LOADING */}
       {isLoading && (
         <div className="popup-overlay">
@@ -271,19 +382,137 @@ export default function Home() {
         </div>
       )}
 
-      {/* LOGIN */}
-      {showLogin && (
-        <div className="popup-overlay">
-          <div className="popup-box">
-            <div className="popup-header">Login</div>
-            <input className="popup-input" placeholder="Username" value={loginUsername} onChange={e => setLoginUsername(e.target.value)} />
-            <input className="popup-input" type="password" placeholder="Password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} />
-            <button className="popup-btn" onClick={handleLogin}>Login</button>
-            <p className="forgot-password-link" onClick={() => { setShowLogin(false); setShowForgotPassword(true); }}>Forgot Password?</p>
-            <button className="popup-close" onClick={() => setShowLogin(false)}>Close</button>
-          </div>
-        </div>
-      )}
+{/* LOGIN */}
+{showLogin && (
+  <div className="popup-overlay">
+    <div className="popup-box">
+      <div className="popup-header">Login</div>
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          handleLogin();
+        }}
+      >
+        <input
+          className="popup-input"
+          placeholder="Username"
+          value={loginUsername}
+          onChange={e => setLoginUsername(e.target.value)}
+        />
+        <input
+          className="popup-input"
+          type="password"
+          placeholder="Password"
+          value={loginPassword}
+          onChange={e => setLoginPassword(e.target.value)}
+        />
+        <button className="popup-btn" type="submit">Login</button>
+      </form>
+      <p
+        className="forgot-password-link"
+        onClick={() => { setShowLogin(false); setShowForgotPassword(true); }}
+      >
+        Forgot Password?
+      </p>
+      <button className="popup-close" onClick={() => setShowLogin(false)}>Close</button>
+    </div>
+  </div>
+)}
+
+{/* SIGNUP */}
+{showSignup && (
+  <div className="popup-overlay">
+    <div className="popup-box">
+      <div className="popup-header">Sign Up</div>
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          handleSignup();
+        }}
+      >
+        <input
+          className="popup-input"
+          placeholder="Username"
+          value={signupUsername}
+          onChange={e => setSignupUsername(e.target.value)}
+        />
+        <input
+          className="popup-input"
+          type="email"
+          placeholder="Email"
+          value={signupEmail}
+          onChange={e => setSignupEmail(e.target.value)}
+        />
+        <input
+          className="popup-input"
+          type="password"
+          placeholder="Password"
+          value={signupPassword}
+          onChange={e => setSignupPassword(e.target.value)}
+        />
+        <button className="popup-btn" type="submit">Create Account</button>
+      </form>
+      <button className="popup-close" onClick={() => setShowSignup(false)}>Close</button>
+    </div>
+  </div>
+)}
+
+{/* FORGOT PASSWORD */}
+{showForgotPassword && (
+  <div className="popup-overlay">
+    <div className="popup-box">
+      <div className="popup-header">Forgot Password</div>
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          handleForgotPassword();
+        }}
+      >
+        <input
+          className="popup-input"
+          type="email"
+          placeholder="Registered Email"
+          value={forgotEmail}
+          onChange={e => setForgotEmail(e.target.value)}
+        />
+        <button className="popup-btn" type="submit">Send Verification</button>
+      </form>
+      <button className="popup-close" onClick={() => setShowForgotPassword(false)}>Close</button>
+    </div>
+  </div>
+)}
+
+{/* RESET PASSWORD */}
+{showResetPassword && (
+  <div className="popup-overlay">
+    <div className="popup-box">
+      <div className="popup-header">Reset Password</div>
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          handleResetPassword();
+        }}
+      >
+        <input
+          className="popup-input"
+          placeholder="Verification Token"
+          value={resetToken}
+          onChange={e => setResetToken(e.target.value)}
+        />
+        <input
+          className="popup-input"
+          type="password"
+          placeholder="New Password"
+          value={newPassword}
+          onChange={e => setNewPassword(e.target.value)}
+        />
+        <button className="popup-btn" type="submit">Reset Password</button>
+      </form>
+      <button className="popup-close" onClick={() => setShowResetPassword(false)}>Close</button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
