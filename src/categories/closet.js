@@ -16,7 +16,7 @@ const ENDPOINT_MAP = {
 };
 
 // ────────── Preview draggable item ──────────
-const DraggablePreviewItem = ({ item, index, onDragStart, onRemoveFromDB }) => {
+const DraggablePreviewItem = ({ item, index, onDragStart, onRemoveFromPreview }) => {
   const ref = useRef(null);
 
   const handleMouseDown = (e) => {
@@ -27,8 +27,8 @@ const DraggablePreviewItem = ({ item, index, onDragStart, onRemoveFromDB }) => {
 
   const handleContextMenu = (e) => {
     e.preventDefault();
-    if (window.confirm("Delete this item from your closet?")) {
-      onRemoveFromDB(item._id, item.category);
+    if (window.confirm("Remove this item from preview?")) {
+      onRemoveFromPreview();
     }
   };
 
@@ -77,7 +77,15 @@ const AnimatedItem = ({ children, delay = 0, onClick, onDelete }) => {
 // ────────── Animated scrollable list ──────────
 const AnimatedList = ({ items = [], onItemSelect, onItemDelete }) => (
   <div className="scroll-list-container horizontal-list-wrapper">
-    <div className="scroll-list" style={{ display: "flex", gap: "15px" }}>
+    <div
+      className="scroll-list"
+      style={{
+        display: "flex",
+        gap: "15px",
+        flexWrap: "wrap",
+        justifyContent: "flex-start",
+      }}
+    >
       {items.map((item, index) => (
         <AnimatedItem
           key={item._id || `${item.name}-${index}`}
@@ -100,7 +108,14 @@ const AnimatedList = ({ items = [], onItemSelect, onItemDelete }) => (
 
 export default function Closet() {
   const navigate = useNavigate();
-  const { previewItems, mainPreviewItem, addItemToPreview, removeItemFromPreview, updateItemPosition, resetCloset } = useCloset();
+  const {
+    previewItems,
+    mainPreviewItem,
+    addItemToPreview,
+    removeItemFromPreview,
+    updateItemPosition,
+    resetCloset,
+  } = useCloset();
   const { user } = useUser();
 
   const [clothesData, setClothesData] = useState({
@@ -261,7 +276,7 @@ export default function Closet() {
               item={item}
               index={i}
               onDragStart={handleDragStart}
-              onRemoveFromDB={deleteItemFromDB}
+              onRemoveFromPreview={() => removeItemFromPreview(i)}
             />
           ))
         ) : mainPreviewItem?.imageUrl ? (
@@ -276,6 +291,12 @@ export default function Closet() {
         <div key={category} className="category-row-wrapper">
           <div className="category-header-and-button">
             <h3 className="category-name">{category}</h3>
+            <button
+              className="more-btn"
+              onClick={() => navigate(`/category/${category.toLowerCase()}`)}
+            >
+              More
+            </button>
           </div>
           <div className="animated-list-container">
             <AnimatedList

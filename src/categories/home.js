@@ -254,7 +254,7 @@ const handleResetPassword = async () => {
             {/* COLORS */}
             <div className="popup-section">
               <p>Colors</p>
-              {["black", "white", "red", "blue"].map(color => (
+              {["black", "white", "red", "blue", "grey", "green", "yellow", "pink"].map(color => (
                 <label key={color} className="popup-checkbox">
                   <input
                     type="checkbox"
@@ -277,7 +277,7 @@ const handleResetPassword = async () => {
             {/* PATTERNS */}
             <div className="popup-section">
               <p>Patterns</p>
-              {["striped", "checkered", "plain"].map(pattern => (
+              {["striped", "checkered", "plain", "tie-dye", "graphic", "floral", "polka-dot", "camouflage"].map(pattern => (
                 <label key={pattern} className="popup-checkbox">
                   <input
                     type="checkbox"

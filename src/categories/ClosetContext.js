@@ -8,7 +8,7 @@ export const ClosetProvider = ({ children }) => {
   const [previewItems, setPreviewItems] = useState([]);     // preview for drag/drop
   const [mainPreviewItem, setMainPreviewItem] = useState(null);
 
-  // Add item to preview
+  /** ---------------- Add item to preview ---------------- */
   const addItemToPreview = (item, containerWidth = 200, containerHeight = 200) => {
     setMainPreviewItem(item);
     const centerX = (containerWidth - 200) / 2;
@@ -20,12 +20,17 @@ export const ClosetProvider = ({ children }) => {
     ]);
   };
 
-  // Remove item from preview
+  /** ---------------- Remove item from preview ---------------- */
   const removeItemFromPreview = (index) => {
-    setPreviewItems(prev => prev.filter((_, i) => i !== index));
+    setPreviewItems(prev => {
+      const updated = prev.filter((_, i) => i !== index);
+      // If nothing left, clear mainPreviewItem
+      if (updated.length === 0) setMainPreviewItem(null);
+      return updated;
+    });
   };
 
-  // Update item position
+  /** ---------------- Update item position ---------------- */
   const updateItemPosition = (index, x, y) => {
     setPreviewItems(prev =>
       prev.map((item, i) =>
@@ -34,19 +39,19 @@ export const ClosetProvider = ({ children }) => {
     );
   };
 
-  // Reset preview
+  /** ---------------- Reset preview ---------------- */
   const resetPreview = useCallback(() => {
     setPreviewItems([]);
     setMainPreviewItem(null);
   }, []);
 
-  // **Reset Closet** (restore for Home)
+  /** ---------------- Reset closet (for Home) ---------------- */
   const resetCloset = useCallback(() => {
     resetPreview();
-    // Optionally, reset other closet-specific state here in the future
+    // Could reset other closet-related states here in the future
   }, [resetPreview]);
 
-  // Load user items from backend
+  /** ---------------- Load user items from backend ---------------- */
   const loadUserItems = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -56,11 +61,11 @@ export const ClosetProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
-      const items = await res.json();
 
+      const items = await res.json();
       if (Array.isArray(items)) {
-        setClosetItems(items);                           // populate all items
-        setPreviewItems(items.map(item => ({ ...item, x: 0, y: 0 }))); // optional
+        setClosetItems(items); // all user items
+        setPreviewItems(items.map(item => ({ ...item, x: 0, y: 0 }))); // initialize preview
         setMainPreviewItem(items[0] || null);
       }
     } catch (err) {
@@ -68,23 +73,24 @@ export const ClosetProvider = ({ children }) => {
     }
   }, []);
 
-  // Auto-load user items when token exists
+  /** ---------------- Auto-load user items on mount ---------------- */
   useEffect(() => {
     loadUserItems();
   }, [loadUserItems]);
 
+  /** ---------------- Context Value ---------------- */
   return (
     <ClosetContext.Provider
       value={{
-        closetItems,            // expose all items
-        setClosetItems,         // expose setter
+        closetItems,
+        setClosetItems,
         previewItems,
         mainPreviewItem,
         addItemToPreview,
-        removeItemFromPreview,
+        removeItemFromPreview,   // right-click removal now works correctly
         updateItemPosition,
         resetPreview,
-        resetCloset,           // <-- added back
+        resetCloset,
         loadUserItems,
       }}
     >

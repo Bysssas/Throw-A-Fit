@@ -20,8 +20,8 @@ export default function Upload() {
   const dropRef = useRef(null);
 
   const categories = ["tops", "bottoms", "shoes", "accessories"];
-  const colors = ["black", "white", "red", "blue"];
-  const patterns = ["plain", "striped", "checkered"];
+  const colors = ["black", "white", "red", "blue", "grey", "green", "yellow", "pink"];
+  const patterns = ["plain", "striped", "checkered", "tie-dye", "graphic", "floral", "polka-dot", "camouflage"];
   const styles = ["casual", "formal", "sporty"];
 
   const API_URL = process.env.REACT_APP_API_URL;
