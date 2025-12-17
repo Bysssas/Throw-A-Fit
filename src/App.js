@@ -31,7 +31,7 @@ export default function App() {
             <Route path="/profile" element={<Profile />} />
 
             {/* Dynamic Category Pages */}
-            <Route path="/items/:category" element={<CategoryPage />} />
+            <Route path="/category/:category" element={<CategoryPage />} />
 
             {/* Reset Password Page */}
             <Route path="/reset-password" element={<ResetPassword />} /> {/* <-- added */}
