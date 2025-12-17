@@ -410,3 +410,19 @@
   cursor: pointer;
 }
 
+/* -------------------- POPUP INPUTS -------------------- */
+.popup-input {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.popup-input:focus {
+  border-color: #3f6bff;
+  box-shadow: 0 0 0 2px rgba(63, 107, 255, 0.2);
+}
