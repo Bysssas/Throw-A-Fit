@@ -78,10 +78,12 @@ export default function CategoryPage() {
 
         const res = await fetch(`${BASE_API_URL}/items/${category}?t=${Date.now()}`, {
           headers: {
-            Authorization: `Bearer ${token}`, // only Authorization header
+            Authorization: `Bearer ${token}`,
           },
-          cache: "no-store", // prevent browser caching
-        });
+          cache: "no-store",
+        }
+      );
+
 
         if (!res.ok) throw new Error("Failed to load items");
 
